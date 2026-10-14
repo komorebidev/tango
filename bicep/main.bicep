@@ -4,7 +4,7 @@ targetScope = 'subscription'
 param location string = 'japaneast'
 
 var suffix = substring(subscription().id, length(subscription().id) - 4, 4)
-var resourceGroupName = 'time-${suffix}'
+var resourceGroupName = 'tango-${suffix}'
 
 // Create the resource group.
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {

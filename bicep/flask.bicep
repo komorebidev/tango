@@ -9,7 +9,7 @@ param suffix string
 @description('Resource ID of the App Service Plan.')
 param appServicePlanId string
 
-var webAppName = 'time-${suffix}'
+var webAppName = 'tangoapp-${suffix}'
 
 resource webApp 'Microsoft.Web/sites@2024-04-01' = {
   name: webAppName
