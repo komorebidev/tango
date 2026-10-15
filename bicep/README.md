@@ -105,7 +105,7 @@ $app = "tangoapp-$suffix"
 az webapp deploy `
   --resource-group $rg `
   --name $app `
-  --src-path ".\tangoapp.zip" `
+  --src-path "tangoapp.zip" `
   --type zip
 ```
 
