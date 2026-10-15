@@ -1,25 +1,25 @@
 # bicep
 
-* Deployment for website infra
+* entra.bicep is separated because it needs to be deploy at tenant level
+* Deploy main.bicep first and then entra.bicep
 
-## Validation command
+## Validation command for main.bicep
 
 ```powershell
-az deployment sub validate `
-  --name "tango-deployment" `
-  --location japaneast `
-  --template-file main.bicep `
-  --parameters location=japaneast
+az deployment sub validate --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast
 ```
 
-## Run command
+## Validation command for entra.bicep
+
 ```powershell
-az deployment sub create `
-  --name "tango-deployment" `
-  --location japaneast `
-  --template-file main.bicep `
-  --parameters location=japaneast `
-  --no-wait
+$suffix = (az account show --query id -o tsv).Substring((az account show --query id -o tsv).Length - 4, 4)
+
+az webapp show --name "tangoapp-$suffix" --resource-group "tango-$suffix" --query defaultHostName -o tsv
+```
+
+## Run command for main.bicep
+```powershell
+az deployment sub create --name "tango-deployment" --location japaneast --template-file main.bicep --parameters location=japaneast --no-wait
 ```
 ## Check service plan tier
 
