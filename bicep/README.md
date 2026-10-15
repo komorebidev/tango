@@ -2,6 +2,16 @@
 
 * Deployment for website infra
 
+## Validation command
+
+```powershell
+az deployment sub validate `
+  --name "tango-deployment" `
+  --location japaneast `
+  --template-file main.bicep `
+  --parameters location=japaneast
+```
+
 ## Run command
 ```powershell
 az deployment sub create `
