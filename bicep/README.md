@@ -23,6 +23,13 @@ az deployment tenant validate --name tango-entra-deployment --location japaneast
 ```powershell
 az deployment sub create --name "tango-deployment" --location japaneast --template-file main.bicep --parameters location=japaneast --no-wait
 ```
+
+## Run command for entra.bicep
+
+```powershell
+az deployment tenant create --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
+```
+
 ## Check service plan tier
 
 * Make sure it is free tier
