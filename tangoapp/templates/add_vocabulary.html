@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Vocabulary | Tango</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f5f6f8; --panel:#fff; --text:#20242b; --muted:#687180; --line:#d9dee7; --accent:#315bd6; --danger:#b42318; --success:#167647; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#15171b; --panel:#202329; --text:#f2f4f7; --muted:#aab2bf; --line:#3b414c; --accent:#8aa7ff; --danger:#ff938a; --success:#7dd9a7; } }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(900px, calc(100% - 32px)); margin:32px auto 64px; }
+    a { color:var(--accent); }
+    h1 { margin:0 0 8px; font-size:clamp(1.7rem,4vw,2.2rem); }
+    h2 { margin:0 0 12px; font-size:1.2rem; }
+    p { margin:0 0 14px; }
+    .muted { color:var(--muted); }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px; margin-top:20px; box-shadow:0 3px 14px #00000008; }
+    label { display:block; font-weight:650; margin:0 0 6px; }
+    input, textarea { width:100%; border:1px solid var(--line); border-radius:9px; background:var(--panel); color:var(--text); padding:11px 12px; font:inherit; }
+    textarea { min-height:88px; resize:vertical; }
+    .field { margin:14px 0; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 16px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+    button { border:1px solid var(--line); border-radius:9px; padding:10px 14px; font:inherit; font-weight:650; cursor:pointer; background:var(--panel); color:var(--text); }
+    button.primary { background:var(--accent); border-color:var(--accent); color:white; }
+    button:disabled { opacity:.55; cursor:wait; }
+    .status { margin-top:12px; white-space:pre-wrap; }
+    .status.error { color:var(--danger); }
+    .status.success { color:var(--success); }
+    .hidden { display:none !important; }
+    .raw-output { min-height:130px; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.9rem; }
+    .jisho-result { border:1px solid var(--line); border-radius:12px; padding:16px; margin-top:12px; }
+    .result-heading { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+    .japanese { font-size:1.12rem; font-weight:750; }
+    .tag { display:inline-block; border:1px solid var(--line); color:var(--muted); border-radius:99px; padding:2px 8px; font-size:.8rem; margin:3px 4px 0 0; }
+    .meaning-text { margin:8px 0; overflow-wrap:anywhere; }
+    .field-preview { border-radius:8px; background:var(--bg); padding:10px 12px; margin:10px 0; }
+    @media (max-width:650px) { main { margin-top:20px; } .panel { padding:16px; } .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="/">← Back to flashcards</a></p>
+  <h1>Add vocabulary</h1>
+  <p class="muted">Generate a draft with AI, compare it with Jisho, edit the fields, then save.</p>
+
+  <section class="panel" aria-labelledby="generate-heading">
+    <h2 id="generate-heading">1. Generate with AI</h2>
+    <form id="generate-form">
+      <div class="field">
+        <label for="word-input">Japanese word</label>
+        <input id="word-input" name="word" type="text" required autocomplete="off" placeholder="e.g. 意思表示">
+      </div>
+      <div class="actions">
+        <button id="generate-button" class="primary" type="submit">Generate entry</button>
+        <button id="jisho-button" type="button">Look up on Jisho</button>
+      </div>
+      <div id="generate-status" class="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section id="jisho-section" class="panel hidden" aria-labelledby="jisho-heading">
+    <h2 id="jisho-heading">Jisho reference</h2>
+    <p class="muted">Choose a result below. You can copy only its reading, only its meaning, or both into the editable AI fields. Your example sentence and translation will not be changed.</p>
+    <div id="jisho-status" class="status" role="status" aria-live="polite"></div>
+    <div id="jisho-results"></div>
+  </section>
+
+  <section id="preview-section" class="panel hidden" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">2. Review and edit entry</h2>
+    <p class="muted">These are the values that will be saved. Jisho selections update only the fields you choose.</p>
+    <form id="save-form">
+      <div class="grid">
+        <div class="field">
+          <label for="entry-word">Word</label>
+          <input id="entry-word" name="word" required>
+        </div>
+        <div class="field">
+          <label for="entry-reading">Reading</label>
+          <input id="entry-reading" name="reading" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="entry-meaning">English meaning</label>
+        <textarea id="entry-meaning" name="meaning" required></textarea>
+      </div>
+      <div class="field">
+        <label for="entry-example">Example sentence (Japanese)</label>
+        <textarea id="entry-example" name="example" required></textarea>
+      </div>
+      <div class="field">
+        <label for="entry-translation">Example translation (English)</label>
+        <textarea id="entry-translation" name="translation" required></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" id="save-button" type="submit">Confirm and save</button>
+        <button id="discard-button" type="button">Discard draft</button>
+      </div>
+      <div id="save-status" class="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <section id="raw-section" class="panel hidden" aria-labelledby="raw-heading">
+    <h2 id="raw-heading">Raw AI output</h2>
+    <p class="muted">The original response returned by the model, before the app parses it into fields.</p>
+    <textarea id="raw-output" class="raw-output" readonly spellcheck="false"></textarea>
+  </section>
+</main>
+
+<script>
+  const generateForm = document.getElementById('generate-form');
+  const wordInput = document.getElementById('word-input');
+  const generateButton = document.getElementById('generate-button');
+  const jishoButton = document.getElementById('jisho-button');
+  const generateStatus = document.getElementById('generate-status');
+  const jishoSection = document.getElementById('jisho-section');
+  const jishoStatus = document.getElementById('jisho-status');
+  const jishoResults = document.getElementById('jisho-results');
+  const previewSection = document.getElementById('preview-section');
+  const rawSection = document.getElementById('raw-section');
+  const saveForm = document.getElementById('save-form');
+  const saveButton = document.getElementById('save-button');
+  const saveStatus = document.getElementById('save-status');
+
+  const fields = {
+    word: document.getElementById('entry-word'),
+    reading: document.getElementById('entry-reading'),
+    meaning: document.getElementById('entry-meaning'),
+    example: document.getElementById('entry-example'),
+    translation: document.getElementById('entry-translation')
+  };
+
+  function setStatus(element, message = '', type = '') {
+    element.textContent = message;
+    element.className = 'status' + (type ? ` ${type}` : '');
+  }
+
+  async function readResponse(response) {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
+    return data;
+  }
+
+  generateForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const word = wordInput.value.trim();
+    if (!word) return;
+
+    generateButton.disabled = true;
+    setStatus(generateStatus, 'Generating entry…');
+    setStatus(saveStatus);
+    try {
+      const response = await fetch('/api/vocabulary/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word })
+      });
+      const data = await readResponse(response);
+      const entry = data.entry || data;
+      for (const key of Object.keys(fields)) fields[key].value = entry[key] || '';
+      document.getElementById('raw-output').value = data.raw_output || '';
+      previewSection.classList.remove('hidden');
+      rawSection.classList.remove('hidden');
+      setStatus(generateStatus, 'Draft generated. Review the fields before saving.', 'success');
+      setStatus(saveStatus);
+      previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      setStatus(generateStatus, error.message || 'Could not generate the entry.', 'error');
+    } finally {
+      generateButton.disabled = false;
+    }
+  });
+
+  jishoButton.addEventListener('click', async () => {
+    const word = (fields.word.value.trim() || wordInput.value.trim());
+    if (!word) {
+      setStatus(jishoStatus, 'Enter a Japanese word first.', 'error');
+      jishoSection.classList.remove('hidden');
+      return;
+    }
+
+    jishoButton.disabled = true;
+    jishoSection.classList.remove('hidden');
+    jishoResults.replaceChildren();
+    setStatus(jishoStatus, 'Searching Jisho…');
+    try {
+      const response = await fetch('/api/vocabulary/jisho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word })
+      });
+      const data = await readResponse(response);
+      if (!data.results || data.results.length === 0) {
+        setStatus(jishoStatus, `No dictionary results found for “${word}”.`, '');
+        return;
+      }
+      setStatus(jishoStatus, `${data.results.length} result(s) found. Choose the most appropriate entry.`);
+      data.results.forEach((result, index) => {
+        const card = document.createElement('article');
+        card.className = 'jisho-result';
+
+        const heading = document.createElement('div');
+        heading.className = 'result-heading';
+        const title = document.createElement('div');
+        title.className = 'japanese';
+        title.textContent = `${index + 1}. ${result.word || word}　${result.reading ? `【${result.reading}】` : ''}`;
+        heading.appendChild(title);
+        if (result.is_common) {
+          const common = document.createElement('span');
+          common.className = 'tag';
+          common.textContent = 'Common word';
+          heading.appendChild(common);
+        }
+        card.appendChild(heading);
+
+        if (result.parts_of_speech && result.parts_of_speech.length) {
+          const tags = document.createElement('div');
+          result.parts_of_speech.forEach((part) => {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = part;
+            tags.appendChild(tag);
+          });
+          card.appendChild(tags);
+        }
+
+        const meaning = document.createElement('p');
+        meaning.className = 'meaning-text';
+        meaning.textContent = result.meaning || 'No English definitions supplied.';
+        card.appendChild(meaning);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const useReading = document.createElement('button');
+        useReading.type = 'button';
+        useReading.textContent = 'Use reading';
+        useReading.disabled = !result.reading;
+        useReading.addEventListener('click', () => {
+          fields.reading.value = result.reading;
+          previewSection.classList.remove('hidden');
+          setStatus(saveStatus, 'Jisho reading copied into the Reading field. Review before saving.', 'success');
+        });
+        const useMeaning = document.createElement('button');
+        useMeaning.type = 'button';
+        useMeaning.textContent = 'Use meaning';
+        useMeaning.disabled = !result.meaning;
+        useMeaning.addEventListener('click', () => {
+          fields.meaning.value = result.meaning;
+          previewSection.classList.remove('hidden');
+          setStatus(saveStatus, 'Jisho definitions copied into the Meaning field. Review before saving.', 'success');
+        });
+        const useBoth = document.createElement('button');
+        useBoth.type = 'button';
+        useBoth.className = 'primary';
+        useBoth.textContent = 'Use both';
+        useBoth.disabled = !result.reading && !result.meaning;
+        useBoth.addEventListener('click', () => {
+          if (result.reading) fields.reading.value = result.reading;
+          if (result.meaning) fields.meaning.value = result.meaning;
+          previewSection.classList.remove('hidden');
+          setStatus(saveStatus, 'Selected Jisho values copied into the draft. Review before saving.', 'success');
+        });
+        const link = document.createElement('a');
+        link.href = result.url || `https://jisho.org/search/${encodeURIComponent(word)}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Open on Jisho ↗';
+        link.style.alignSelf = 'center';
+        actions.append(useReading, useMeaning, useBoth, link);
+        card.appendChild(actions);
+        jishoResults.appendChild(card);
+      });
+    } catch (error) {
+      setStatus(jishoStatus, error.message || 'Jisho lookup failed.', 'error');
+    } finally {
+      jishoButton.disabled = false;
+    }
+  });
+
+  saveForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const entry = Object.fromEntries(
+      Object.entries(fields).map(([key, element]) => [key, element.value.trim()])
+    );
+    saveButton.disabled = true;
+    setStatus(saveStatus, 'Saving vocabulary entry…');
+    try {
+      const response = await fetch('/api/vocabulary/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      });
+      const data = await readResponse(response);
+      const destination = data.destination === 'github' ? 'GitHub' : 'the local database';
+      setStatus(saveStatus, `Saved successfully to ${destination}.`, 'success');
+    } catch (error) {
+      setStatus(saveStatus, error.message || 'Could not save the entry.', 'error');
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+
+  document.getElementById('discard-button').addEventListener('click', () => {
+    if (!confirm('Discard this draft?')) return;
+    for (const element of Object.values(fields)) element.value = '';
+    document.getElementById('raw-output').value = '';
+    previewSection.classList.add('hidden');
+    rawSection.classList.add('hidden');
+    setStatus(saveStatus);
+    setStatus(generateStatus);
+  });
+</script>
+</body>
+</html>
+

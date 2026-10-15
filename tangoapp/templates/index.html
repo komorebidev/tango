@@ -1,0 +1,801 @@
+i<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>単語</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        .container {
+            width: min(100% - 32px, 720px);
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .visit-counter {
+            text-align: right;
+            color: #888;
+            font-size: 0.8rem;
+            margin: 0 0 24px;
+        }
+
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: #e1e3e8;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: #4776e6;
+            border-radius: 999px;
+            transition: width 0.2s ease;
+        }
+
+        .card {
+            min-height: 300px;
+            background: white;
+            border-radius: 20px;
+            padding: 32px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            touch-action: pan-y;
+            user-select: none;
+        }
+
+        .card-label {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .word {
+            font-size: clamp(2.4rem, 9vw, 4rem);
+            font-weight: 700;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        .reading {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 12px;
+        }
+
+        .meaning {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .example {
+            width: 100%;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: left;
+        }
+
+        .example-japanese {
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .example-english {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+
+        button:hover {
+            opacity: 0.88;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .action-button {
+            flex: 1;
+            min-height: 52px;
+        }
+
+        .missed-button {
+            background: #fff0ee;
+            color: #b9382d;
+        }
+
+        .remembered-button {
+            background: #e5f7eb;
+            color: #197341;
+        }
+
+        .secondary-button {
+            background: #e9edf5;
+            color: #333;
+        }
+
+        .hint {
+            color: #888;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .message {
+            padding: 18px;
+            border-radius: 12px;
+            background: white;
+            text-align: center;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        .error {
+            color: #b9382d;
+        }
+
+        .summary {
+            background: white;
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .summary h2 {
+            margin-top: 0;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .stat {
+            background: #f5f6fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #777;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .summary-actions button {
+            flex: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: min(100% - 20px, 720px);
+                padding-top: 20px;
+            }
+
+            .card {
+                min-height: 280px;
+                padding: 28px 18px;
+            }
+
+            .button-row {
+                gap: 8px;
+            }
+
+            .action-button {
+                padding: 13px 10px;
+                font-size: 0.92rem;
+            }
+
+            .summary-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <div>
+                <h1>Tango</h1>
+                <div class="subtitle">Japanese vocabulary practice</div>
+            </div>
+        </header>
+
+        <p class="visit-counter">
+            Site visits: {{ visit_count }}
+        </p>
+
+        <section id="study-section">
+            <div class="progress-section">
+                <div class="progress-labels">
+                    <span id="round-label">Round 1</span>
+                    <span id="progress-label">0 / 0</span>
+                </div>
+                <div
+                    class="progress-track"
+                    role="progressbar"
+                    aria-label="Study progress"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                    id="progress-track"
+                >
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="loading" class="message">
+                Loading vocabulary...
+            </div>
+
+            <div id="error-message" class="message error hidden"></div>
+
+            <div id="card-area" class="hidden">
+                <div class="card" id="flashcard">
+                    <div class="card-label" id="card-label">
+                        What does this word mean?
+                    </div>
+
+                    <div class="word" id="word"></div>
+                    <div class="reading hidden" id="reading"></div>
+                    <div class="meaning hidden" id="meaning"></div>
+
+                    <div class="example hidden" id="example">
+                        <div class="example-japanese" id="example-japanese"></div>
+                        <div class="example-english" id="example-english"></div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button
+                        type="button"
+                        class="action-button missed-button"
+                        id="missed-button"
+                    >
+                        ← Didn't remember
+                    </button>
+
+                    <button
+                        type="button"
+                        class="action-button remembered-button"
+                        id="remembered-button"
+                    >
+                        Remembered →
+                    </button>
+                </div>
+
+                <div class="hint">
+                    Use ← and → arrow keys, or swipe the card.
+                </div>
+            </div>
+        </section>
+
+        <section id="summary-section" class="summary hidden">
+            <h2 id="summary-title">Study complete!</h2>
+            <p id="summary-message"></p>
+
+            <div class="summary-stats">
+                <div class="stat">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Unique words studied</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-value" id="stat-accuracy">0%</div>
+                    <div class="stat-label">First-round accuracy</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-value" id="stat-corrected">0</div>
+                    <div class="stat-label">Words corrected</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-value" id="stat-rounds">0</div>
+                    <div class="stat-label">Rounds completed</div>
+                </div>
+            </div>
+
+            <div class="summary-actions">
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="review-button"
+                >
+                    Review missed words again
+                </button>
+
+                <button
+                    type="button"
+                    class="remembered-button"
+                    id="restart-button"
+                >
+                    Restart session
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const studySection = document.getElementById("study-section");
+        const summarySection = document.getElementById("summary-section");
+
+        const loading = document.getElementById("loading");
+        const errorMessage = document.getElementById("error-message");
+        const cardArea = document.getElementById("card-area");
+        const flashcard = document.getElementById("flashcard");
+
+        const wordElement = document.getElementById("word");
+        const readingElement = document.getElementById("reading");
+        const meaningElement = document.getElementById("meaning");
+        const exampleElement = document.getElementById("example");
+        const exampleJapaneseElement =
+            document.getElementById("example-japanese");
+        const exampleEnglishElement =
+            document.getElementById("example-english");
+
+        const cardLabel = document.getElementById("card-label");
+        const roundLabel = document.getElementById("round-label");
+        const progressLabel = document.getElementById("progress-label");
+        const progressBar = document.getElementById("progress-bar");
+        const progressTrack = document.getElementById("progress-track");
+
+        const missedButton = document.getElementById("missed-button");
+        const rememberedButton = document.getElementById("remembered-button");
+        const reviewButton = document.getElementById("review-button");
+        const restartButton = document.getElementById("restart-button");
+
+        let originalDeck = [];
+        let currentDeck = [];
+        let currentIndex = 0;
+        let currentRound = 1;
+
+        let missedThisRound = [];
+        let missedFirstRound = [];
+        let firstRoundRemembered = new Set();
+        let correctedWords = new Set();
+        let completedRounds = 0;
+        let answerRevealed = false;
+        let sessionFinished = false;
+
+        function shuffle(array) {
+            const result = [...array];
+
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+
+            return result;
+        }
+
+        function getExampleJapanese(item) {
+            return item.example || item.example_japanese || "";
+        }
+
+        function getExampleEnglish(item) {
+            return item.translation || item.example_english || "";
+        }
+
+        function hideAnswer() {
+            readingElement.classList.add("hidden");
+            meaningElement.classList.add("hidden");
+            exampleElement.classList.add("hidden");
+        }
+
+        function showAnswer(item) {
+            readingElement.textContent = item.reading || "";
+            meaningElement.textContent = item.meaning || "";
+
+            const exampleJapanese = getExampleJapanese(item);
+            const exampleEnglish = getExampleEnglish(item);
+
+            exampleJapaneseElement.textContent = exampleJapanese;
+            exampleEnglishElement.textContent = exampleEnglish;
+
+            readingElement.classList.toggle("hidden", !item.reading);
+            meaningElement.classList.toggle("hidden", !item.meaning);
+
+            exampleElement.classList.toggle(
+                "hidden",
+                !exampleJapanese && !exampleEnglish
+            );
+
+            answerRevealed = true;
+            cardLabel.textContent = "Answer";
+            missedButton.textContent = "← Next";
+            rememberedButton.textContent = "Next →";
+        }
+
+        function updateProgress() {
+            const total = currentDeck.length;
+            const completed = Math.min(currentIndex, total);
+            const percentage = total === 0
+                ? 0
+                : (completed / total) * 100;
+
+            roundLabel.textContent = `Round ${currentRound}`;
+            progressLabel.textContent = `${completed} / ${total}`;
+            progressBar.style.width = `${percentage}%`;
+
+            progressTrack.setAttribute(
+                "aria-valuenow",
+                String(Math.round(percentage))
+            );
+        }
+
+        function renderCard() {
+            if (currentIndex >= currentDeck.length) {
+                finishRound();
+                return;
+            }
+
+            const item = currentDeck[currentIndex];
+
+            wordElement.textContent = item.word;
+            hideAnswer();
+
+            answerRevealed = false;
+            cardLabel.textContent = "What does this word mean?";
+            missedButton.textContent = "← Didn't remember";
+            rememberedButton.textContent = "Remembered →";
+
+            updateProgress();
+        }
+
+        function revealCurrentAnswer() {
+            if (sessionFinished || currentIndex >= currentDeck.length) {
+                return;
+            }
+
+            if (!answerRevealed) {
+                showAnswer(currentDeck[currentIndex]);
+            }
+        }
+
+        function markMissed() {
+            if (sessionFinished || currentIndex >= currentDeck.length) {
+                return;
+            }
+
+            if (answerRevealed) {
+                currentIndex++;
+                renderCard();
+                return;
+            }
+
+            const item = currentDeck[currentIndex];
+
+            if (currentRound === 1) {
+                missedThisRound.push(item);
+
+                if (!missedFirstRound.some(
+                    missed => missed.word === item.word
+                )) {
+                    missedFirstRound.push(item);
+                }
+            } else {
+                if (!missedThisRound.some(
+                    missed => missed.word === item.word
+                )) {
+                    missedThisRound.push(item);
+                }
+            }
+
+            showAnswer(item);
+        }
+
+        function markRemembered() {
+            if (sessionFinished || currentIndex >= currentDeck.length) {
+                return;
+            }
+
+            const item = currentDeck[currentIndex];
+
+            if (!answerRevealed) {
+                if (currentRound === 1) {
+                    firstRoundRemembered.add(item.word);
+                } else {
+                    correctedWords.add(item.word);
+                }
+            }
+
+            currentIndex++;
+            renderCard();
+        }
+
+        function finishRound() {
+            completedRounds++;
+
+            if (currentRound === 1) {
+                if (missedThisRound.length > 0) {
+                    beginReviewRound();
+                } else {
+                    finishSession();
+                }
+
+                return;
+            }
+
+            if (missedThisRound.length > 0) {
+                beginReviewRound();
+            } else {
+                finishSession();
+            }
+        }
+
+        function beginReviewRound() {
+            currentRound++;
+            currentDeck = shuffle(missedThisRound);
+            missedThisRound = [];
+            currentIndex = 0;
+
+            renderCard();
+        }
+
+        function finishSession() {
+            sessionFinished = true;
+
+            studySection.classList.add("hidden");
+            summarySection.classList.remove("hidden");
+
+            const total = originalDeck.length;
+            const remembered = firstRoundRemembered.size;
+            const accuracy = total === 0
+                ? 0
+                : Math.round((remembered / total) * 100);
+
+            document.getElementById("stat-total").textContent = total;
+            document.getElementById("stat-accuracy").textContent =
+                `${accuracy}%`;
+            document.getElementById("stat-corrected").textContent =
+                correctedWords.size;
+            document.getElementById("stat-rounds").textContent =
+                completedRounds;
+
+            document.getElementById("summary-title").textContent =
+                "Study complete!";
+
+            document.getElementById("summary-message").textContent =
+                missedFirstRound.length === 0
+                    ? "Excellent! You remembered every word in the first round."
+                    : "You've finished this session. Keep practising to improve your recall.";
+
+            reviewButton.classList.toggle(
+                "hidden",
+                missedFirstRound.length === 0
+            );
+        }
+
+        function startReviewAgain() {
+            if (missedFirstRound.length === 0) {
+                return;
+            }
+
+            summarySection.classList.add("hidden");
+            studySection.classList.remove("hidden");
+
+            currentRound++;
+            currentDeck = shuffle(missedFirstRound);
+            missedThisRound = [];
+            currentIndex = 0;
+            sessionFinished = false;
+
+            renderCard();
+        }
+
+        function restartSession() {
+            currentDeck = shuffle(originalDeck);
+            currentIndex = 0;
+            currentRound = 1;
+
+            missedThisRound = [];
+            missedFirstRound = [];
+            firstRoundRemembered = new Set();
+            correctedWords = new Set();
+            completedRounds = 0;
+            answerRevealed = false;
+            sessionFinished = false;
+
+            summarySection.classList.add("hidden");
+            studySection.classList.remove("hidden");
+            loading.classList.add("hidden");
+            errorMessage.classList.add("hidden");
+            cardArea.classList.remove("hidden");
+
+            renderCard();
+        }
+
+        async function loadVocabulary() {
+            try {
+                const response = await fetch("/api/vocabulary");
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Could not load vocabulary (HTTP ${response.status}).`
+                    );
+                }
+
+                const vocabulary = await response.json();
+
+                if (!Array.isArray(vocabulary) || vocabulary.length === 0) {
+                    throw new Error("Your vocabulary database is empty.");
+                }
+
+                originalDeck = vocabulary;
+                restartSession();
+            } catch (error) {
+                loading.classList.add("hidden");
+                errorMessage.textContent =
+                    `Unable to load vocabulary: ${error.message}`;
+                errorMessage.classList.remove("hidden");
+            }
+        }
+
+        missedButton.addEventListener("click", markMissed);
+        rememberedButton.addEventListener("click", markRemembered);
+        reviewButton.addEventListener("click", startReviewAgain);
+        restartButton.addEventListener("click", restartSession);
+
+        document.addEventListener("keydown", event => {
+            if (
+                event.target instanceof HTMLInputElement ||
+                event.target instanceof HTMLTextAreaElement ||
+                event.target instanceof HTMLSelectElement ||
+                event.target.isContentEditable
+            ) {
+                return;
+            }
+
+            if (
+                sessionFinished ||
+                studySection.classList.contains("hidden")
+            ) {
+                return;
+            }
+
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                markMissed();
+            } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                markRemembered();
+            }
+        });
+
+        let touchStartX = null;
+        let touchStartY = null;
+
+        flashcard.addEventListener("touchstart", event => {
+            if (event.touches.length !== 1) {
+                return;
+            }
+
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        }, { passive: true });
+
+        flashcard.addEventListener("touchend", event => {
+            if (
+                touchStartX === null ||
+                touchStartY === null ||
+                event.changedTouches.length !== 1
+            ) {
+                return;
+            }
+
+            const deltaX = event.changedTouches[0].clientX - touchStartX;
+            const deltaY = event.changedTouches[0].clientY - touchStartY;
+
+            touchStartX = null;
+            touchStartY = null;
+
+            if (
+                Math.abs(deltaX) < 60 ||
+                Math.abs(deltaX) < Math.abs(deltaY)
+            ) {
+                return;
+            }
+
+            if (deltaX < 0) {
+                markMissed();
+            } else {
+                markRemembered();
+            }
+        }, { passive: true });
+
+        loadVocabulary();
+    </script>
+</body>
+</html>
