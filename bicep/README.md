@@ -3,6 +3,17 @@
 * entra.bicep is separated because it needs to be deploy at tenant level
 * Deploy main.bicep first and then entra.bicep
 
+## Important Note
+
+### Troubleshooting: Bicep Microsoft Graph Deployment Error (`403 Forbidden`)
+
+Even as a Global Admin, deploying Bicep files that use Microsoft Graph from Cloud Shell fails with a `403 Forbidden` error because Cloud Shell's default session uses an Azure token instead of a Microsoft Graph token.
+
+**The Fix (Azure CLI in Cloud Shell):**
+```bash
+az login --scope [https://graph.microsoft.com/.default](https://graph.microsoft.com/.default)
+```
+
 ## Validation command for main.bicep
 
 ```powershell
