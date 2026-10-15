@@ -1,2 +1,4 @@
 Flask
 requests
+azure-identity
+azure-storage-blob

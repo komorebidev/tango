@@ -7,6 +7,14 @@ from pathlib import Path
 from urllib.parse import quote
 
 import requests
+from azure.core import MatchConditions
+from azure.core.exceptions import (
+    ResourceExistsError,
+    ResourceModifiedError,
+    ResourceNotFoundError,
+)
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobClient
 from flask import Flask, jsonify, render_template, request
 
 from cloudflare_ai import run_ai
@@ -17,39 +25,156 @@ app.json.ensure_ascii = False
 BASE_DIR = Path(__file__).resolve().parent
 DB_FILE = BASE_DIR / "db.json"
 VISITS_FILE = BASE_DIR / "visits.json"
+VISITS_BLOB_NAME = "visits.json"
+
 visits_lock = threading.Lock()
 vocabulary_lock = threading.Lock()
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main")
-# Your repository's vocabulary file is at the repository root. Set
-# GITHUB_DB_PATH=db.json in the environment to use it.
+# Your repository's vocabulary file is at the repository root.
+# Set GITHUB_DB_PATH=db.json in the environment to use it.
 GITHUB_DB_PATH = os.getenv("GITHUB_DB_PATH", "tangoapp/db.json")
 GITHUB_CONFIGURED = bool(GITHUB_TOKEN and GITHUB_REPOSITORY)
+
 JISHO_API_URL = "https://jisho.org/api/v1/search/words"
+
+AZURE_STORAGE_ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
+AZURE_STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME")
+
+# Use managed identity on Azure. If the storage settings are absent,
+# use the local visits.json file for local development.
+storage_credential = (
+    DefaultAzureCredential()
+    if AZURE_STORAGE_ACCOUNT_URL and AZURE_STORAGE_CONTAINER_NAME
+    else None
+)
 
 
 def get_visit_count():
-    with visits_lock:
-        try:
-            if VISITS_FILE.exists():
-                data = json.loads(VISITS_FILE.read_text(encoding="utf-8"))
-                count = int(data.get("count", 0))
-            else:
+    # Local development: use visits.json on disk.
+    if storage_credential is None:
+        with visits_lock:
+            try:
+                if VISITS_FILE.exists():
+                    data = json.loads(
+                        VISITS_FILE.read_text(encoding="utf-8")
+                    )
+                    count = int(data.get("count", 0))
+                else:
+                    count = 0
+            except (OSError, ValueError, TypeError, json.JSONDecodeError):
                 count = 0
-        except (OSError, ValueError, TypeError, json.JSONDecodeError):
-            count = 0
 
-        count += 1
-        try:
-            VISITS_FILE.write_text(
-                json.dumps({"count": count}, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-        except OSError:
-            app.logger.exception("Could not update visits.json")
-        return count
+            count += 1
+
+            try:
+                VISITS_FILE.write_text(
+                    json.dumps(
+                        {"count": count},
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    encoding="utf-8",
+                )
+            except OSError:
+                app.logger.exception("Could not update local visits.json")
+
+            return count
+
+    # Azure: use visits.json in the private Blob Storage container.
+    blob = BlobClient(
+        account_url=AZURE_STORAGE_ACCOUNT_URL,
+        container_name=AZURE_STORAGE_CONTAINER_NAME,
+        blob_name=VISITS_BLOB_NAME,
+        credential=storage_credential,
+    )
+
+    # Create the initial counter if it does not exist.
+    # If another request creates it first, continue with the existing blob.
+    try:
+        blob.upload_blob(
+            json.dumps({"count": 0}),
+            overwrite=False,
+            content_type="application/json",
+        )
+    except ResourceExistsError:
+        pass
+    except Exception:
+        # A concurrent creation or transient failure may require a retry.
+        # The subsequent read determines whether the blob is available.
+        app.logger.debug(
+            "Initial visits.json creation did not complete; "
+            "attempting to read the existing blob.",
+            exc_info=True,
+        )
+
+    # Conditional updates prevent concurrent requests from silently
+    # overwriting each other's increments.
+    max_attempts = 10
+
+    try:
+        for attempt in range(max_attempts):
+            try:
+                # Read the content and the ETag from the same response.
+                downloader = blob.download_blob()
+                data = json.loads(downloader.readall())
+                etag = downloader.properties.etag
+
+                if not isinstance(data, dict):
+                    raise ValueError(
+                        "visits.json must contain a JSON object."
+                    )
+
+                count = int(data.get("count", 0)) + 1
+
+                updated_data = json.dumps(
+                    {"count": count},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+
+                # Only write if the blob still has the ETag we read.
+                blob.upload_blob(
+                    updated_data,
+                    overwrite=True,
+                    etag=etag,
+                    match_condition=MatchConditions.IfNotModified,
+                    content_type="application/json",
+                )
+
+                return count
+
+            except ResourceModifiedError:
+                # Another request updated the blob. Read the latest value
+                # and try again.
+                app.logger.debug(
+                    "visits.json changed concurrently; retry %s of %s.",
+                    attempt + 1,
+                    max_attempts,
+                )
+                continue
+
+            except ResourceNotFoundError:
+                # The blob may have disappeared between operations.
+                # Recreate it and retry.
+                try:
+                    blob.upload_blob(
+                        json.dumps({"count": 0}),
+                        overwrite=False,
+                        content_type="application/json",
+                    )
+                except ResourceExistsError:
+                    pass
+                continue
+
+        raise RuntimeError(
+            "Could not update visits.json after repeated concurrent changes."
+        )
+
+    finally:
+        blob.close()
 
 
 def github_headers():
@@ -128,7 +253,9 @@ def extract_ai_json(ai_result):
     try:
         raw_output = ai_result["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as exc:
-        raise ValueError("The AI response did not contain message content.") from exc
+        raise ValueError(
+            "The AI response did not contain message content."
+        ) from exc
 
     cleaned = raw_output.strip()
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
@@ -196,7 +323,7 @@ def generate_vocabulary():
         },
         {
             "role": "user",
-            "content": f'Create a vocabulary entry for this Japanese word: {word}',
+            "content": f"Create a vocabulary entry for this Japanese word: {word}",
         },
     ]
 
@@ -233,10 +360,14 @@ def jisho_vocabulary():
         response.raise_for_status()
         payload = response.json()
     except requests.Timeout:
-        return jsonify({"error": "Jisho took too long to respond. Please try again."}), 504
+        return jsonify(
+            {"error": "Jisho took too long to respond. Please try again."}
+        ), 504
     except (requests.RequestException, ValueError) as exc:
         app.logger.exception("Jisho lookup failed")
-        return jsonify({"error": f"Could not look up this word on Jisho: {exc}"}), 502
+        return jsonify(
+            {"error": f"Could not look up this word on Jisho: {exc}"}
+        ), 502
 
     results = []
     for item in payload.get("data", []):
@@ -276,7 +407,11 @@ def jisho_vocabulary():
                     )
                 ),
                 "is_common": bool(item.get("is_common")),
-                "url": f"https://jisho.org/word/{quote(slug, safe='')}" if slug else "https://jisho.org/search/" + quote(word, safe=""),
+                "url": (
+                    f"https://jisho.org/word/{quote(slug, safe='')}"
+                    if slug
+                    else "https://jisho.org/search/" + quote(word, safe="")
+                ),
             }
         )
 
@@ -291,7 +426,9 @@ def save_vocabulary_entry():
 
     missing = [field for field in fields if not entry[field]]
     if missing:
-        return jsonify({"error": "Please fill in all fields before saving."}), 400
+        return jsonify(
+            {"error": "Please fill in all fields before saving."}
+        ), 400
 
     try:
         with vocabulary_lock:
@@ -302,7 +439,14 @@ def save_vocabulary_entry():
                 if isinstance(item, dict)
             }
             if entry["word"] in existing_words:
-                return jsonify({"error": f'"{entry["word"]}" already exists in the vocabulary database.'}), 409
+                return jsonify(
+                    {
+                        "error": (
+                            f'"{entry["word"]}" already exists '
+                            "in the vocabulary database."
+                        )
+                    }
+                ), 409
 
             vocabulary.append(entry)
             vocabulary.sort(
@@ -313,13 +457,23 @@ def save_vocabulary_entry():
             )
             destination = save_vocabulary(vocabulary)
 
-        return jsonify({"success": True, "destination": destination, "entry": entry})
+        return jsonify(
+            {
+                "success": True,
+                "destination": destination,
+                "entry": entry,
+            }
+        )
     except requests.RequestException as exc:
         app.logger.exception("Could not save vocabulary to GitHub")
-        return jsonify({"error": f"Could not save vocabulary: {exc}"}), 502
+        return jsonify(
+            {"error": f"Could not save vocabulary: {exc}"}
+        ), 502
     except (OSError, ValueError, KeyError) as exc:
         app.logger.exception("Could not save vocabulary")
-        return jsonify({"error": f"Could not save vocabulary: {exc}"}), 500
+        return jsonify(
+            {"error": f"Could not save vocabulary: {exc}"}
+        ), 500
 
 
 @app.route("/api/health")
@@ -339,4 +493,3 @@ def api_stats():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
