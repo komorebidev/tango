@@ -55,14 +55,14 @@
     "meaning": "particle"
   },
   {
-    "word": "世辞",
-    "reading": "せじ",
-    "meaning": "flattery"
-  },
-  {
     "word": "整理券",
     "reading": "せいりけん",
     "meaning": "numbered ticket"
+  },
+  {
+    "word": "世辞",
+    "reading": "せじ",
+    "meaning": "flattery"
   },
   {
     "word": "地位",
@@ -83,5 +83,12 @@
     "word": "筆者",
     "reading": "ひっしゃ",
     "meaning": "writer"
+  },
+  {
+    "word": "螺旋",
+    "reading": "らせん",
+    "meaning": "spiral",
+    "example": "螺旋階段をのぼっていくと、展望台にたどりつく。",
+    "translation": "If you climb the spiral staircase, you will arrive at the observation deck."
   }
 ]
