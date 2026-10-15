@@ -3,6 +3,12 @@ targetScope = 'subscription'
 @description('Azure region for the resource group and application.')
 param location string = 'japaneast'
 
+@description('Application (client) ID of the Entra app registration.')
+param entraClientId string
+
+@description('Tenant ID of the Entra directory.')
+param entraTenantId string
+
 var suffix = substring(subscription().id, length(subscription().id) - 4, 4)
 var resourceGroupName = 'tango-${suffix}'
 
@@ -24,6 +30,8 @@ module flask './flask.bicep' = {
   scope: rg
   name: 'flask-deployment'
   params: {
+    entraClientId: entraClientId
+    entraTenantId: entraTenantId
     location: location
     suffix: suffix
     appServicePlanId: servicePlan.outputs.appServicePlanId

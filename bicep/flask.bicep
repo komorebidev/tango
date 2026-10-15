@@ -9,6 +9,12 @@ param suffix string
 @description('Resource ID of the App Service Plan.')
 param appServicePlanId string
 
+@description('Application (client) ID of the Entra app registration.')
+param entraClientId string
+
+@description('Tenant ID of the Entra directory.')
+param entraTenantId string
+
 var webAppName = 'tangoapp-${suffix}'
 var storageAccountName = 'tangodata${suffix}'
 
@@ -59,6 +65,40 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
           value: 'tango-data'
         }
       ]
+    }
+  }
+}
+
+resource webAppAuth 'Microsoft.Web/sites/config@2024-04-01' = {
+  parent: webApp
+  name: 'authsettingsV2'
+  properties: {
+    platform: {
+      enabled: true
+      runtimeVersion: '~1'
+    }
+    globalValidation: {
+      requireAuthentication: false
+      unauthenticatedClientAction: 'AllowAnonymous'
+    }
+    identityProviders: {
+      azureActiveDirectory: {
+        enabled: true
+        registration: {
+          openIdIssuer: 'https://login.microsoftonline.com/${entraTenantId}/v2.0'
+          clientId: entraClientId
+        }
+        validation: {
+          allowedAudiences: [
+            entraClientId
+          ]
+        }
+      }
+    }
+    login: {
+      tokenStore: {
+        enabled: false
+      }
     }
   }
 }
