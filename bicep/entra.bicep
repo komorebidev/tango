@@ -5,14 +5,13 @@ extension microsoftGraphV1
 @description('Suffix derived from the subscription ID.')
 param suffix string
 
-@description('The deployed Tango web app hostname.')
+@description('The deployed Tango web app hostname, without https://.')
 param webAppHostName string
 
 var appDisplayName = 'tango-auth-${suffix}'
-var appUniqueName = 'tango-auth-${suffix}'
 
 resource appRegistration 'Microsoft.Graph/applications@v1.0' = {
-  uniqueName: appUniqueName
+  uniqueName: appDisplayName
   displayName: appDisplayName
   signInAudience: 'AzureADMyOrg'
   web: {

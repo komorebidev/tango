@@ -40,20 +40,9 @@ module blob './blob.bicep' = {
   }
 }
 
-module entra './entra.bicep' = {
-  scope: tenant()
-  name: 'entra-deployment'
-  params: {
-    suffix: suffix
-    webAppHostName: flask.outputs.webAppHostName
-  }
-}
-
 output resourceGroupName string = rg.name
 output webAppName string = flask.outputs.webAppName
 output webAppUrl string = flask.outputs.webAppUrl
 output storageAccountName string = blob.outputs.storageAccountName
 output storageAccountUrl string = blob.outputs.storageAccountUrl
 output storageContainerName string = blob.outputs.containerName
-output entraClientId string = entra.outputs.clientId
-output entraTenantId string = entra.outputs.tenantId
