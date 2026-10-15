@@ -15,6 +15,8 @@ az deployment sub validate --name tango-deployment --location japaneast --templa
 $suffix = (az account show --query id -o tsv).Substring((az account show --query id -o tsv).Length - 4, 4)
 
 az webapp show --name "tangoapp-$suffix" --resource-group "tango-$suffix" --query defaultHostName -o tsv
+
+az deployment tenant validate --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
 ```
 
 ## Run command for main.bicep
