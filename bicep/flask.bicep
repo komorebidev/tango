@@ -10,11 +10,15 @@ param suffix string
 param appServicePlanId string
 
 var webAppName = 'tangoapp-${suffix}'
+var storageAccountName = 'tangodata${suffix}'
 
 resource webApp 'Microsoft.Web/sites@2024-04-01' = {
   name: webAppName
   location: location
   kind: 'app,linux'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     httpsOnly: true
     serverFarmId: appServicePlanId
@@ -25,7 +29,6 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
       appCommandLine: 'gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app'
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
-
       appSettings: [
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
@@ -47,6 +50,14 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'CLOUDFLARE_API_TOKEN'
           value: ''
         }
+        {
+          name: 'AZURE_STORAGE_ACCOUNT_URL'
+          value: 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
+        }
+        {
+          name: 'AZURE_STORAGE_CONTAINER_NAME'
+          value: 'tango-data'
+        }
       ]
     }
   }
@@ -54,3 +65,5 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
 
 output webAppName string = webApp.name
 output webAppUrl string = 'https://${webApp.properties.defaultHostName}'
+output webAppHostName string = webApp.properties.defaultHostName
+output webAppPrincipalId string = webApp.identity.principalId
