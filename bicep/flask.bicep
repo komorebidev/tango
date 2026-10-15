@@ -36,6 +36,18 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
       appSettings: [
+        { 
+          name: 'GITHUB_REPOSITORY'
+          value: 'komorebidev/tango' 
+        }
+        { 
+          name: 'GITHUB_BRANCH'
+          value: 'main'
+          }
+        { 
+          name: 'GITHUB_DB_PATH'
+          value: 'db.json'
+          }
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'true'
