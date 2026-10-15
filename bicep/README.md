@@ -62,6 +62,54 @@ az deployment sub create --name tango-deployment --location japaneast --template
 az deployment tenant create --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
 ```
 
+### Package zip command
+
+* Inside the package directory (flask files)
+
+```python
+Set-Location "xxxapp"
+
+@'
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
+
+root = Path.cwd()
+output = root.parent / "tangoapp.zip"
+
+files = [
+    "app.py",
+    "cloudflare_ai.py",
+    "github_client.py",
+    "requirements.txt",
+    "templates/style.cssl",
+    "templates/app.js",
+    "templates/add_vocabulary.html",
+    "templates/index.html",
+]
+
+with ZipFile(output, "w", ZIP_DEFLATED) as z:
+    for name in files:
+        z.write(root / name, arcname=name)
+
+print(f"Created {output}")
+'@ | python -
+```
+
+### Flask deployment command
+
+```powershell
+$subId = az account show --query id --output tsv
+$suffix = $subId.Substring($subId.Length - 4)
+$rg = "tango-$suffix"
+$app = "tangoapp-$suffix"
+
+az webapp deploy `
+  --resource-group $rg `
+  --name $app `
+  --src-path ".\tangoapp.zip" `
+  --type zip
+```
+
 ## Check service plan tier
 
 * Make sure it is free tier
