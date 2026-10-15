@@ -14,37 +14,52 @@ Even as a Global Admin, deploying Bicep files that use Microsoft Graph from Clou
 az login --scope [https://graph.microsoft.com/.default](https://graph.microsoft.com/.default)
 ```
 
-## Validation command for main.bicep
+## Run commands
+
+# Get subscription suffix
 
 ```powershell
-az deployment sub validate --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast
+$subscriptionId = az account show --query id -o tsv
+$suffix = $subscriptionId.Substring($subscriptionId.Length - 4, 4)
 ```
 
-## Validation command for entra.bicep
+# Get Entra tenant ID
 
 ```powershell
-$suffix = (az account show --query id -o tsv).Substring((az account show --query id -o tsv).Length - 4, 4)
-
-az webapp show --name "tangoapp-$suffix" --resource-group "tango-$suffix" --query defaultHostName -o tsv
-
-az deployment tenant validate --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
+$entraTenantId = az account show --query tenantId -o tsv
 ```
 
-## Run command for main.bicep
+# Get Entra app registration client ID
+
 ```powershell
-az deployment sub create --name "tango-deployment" --location japaneast --template-file main.bicep --parameters location=japaneast --no-wait
+$entraClientId = az ad app list --display-name "tango-auth-$suffix" --query "[0].appId" -o tsv
 ```
 
-## Run command for entra.bicep
+# Get App Service hostname
+```powershell
+$webAppHostName = az webapp show --name "tangoapp-$suffix" --resource-group "tango-$suffix" --query defaultHostName -o tsv
+```
+
+# Validate main.bicep
+
+```powershell
+az deployment sub validate --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast entraClientId=$entraClientId entraTenantId=$entraTenantId
+```
+
+# Validate entra.bicep
+```powershell
+az deployment tenant validate --name tango-entra-validation --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
+```
+
+# Deploy main.bicep
+```powershell
+az deployment sub create --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast entraClientId=$entraClientId entraTenantId=$entraTenantId --no-wait
+```
+
+# Deploy entra.bicep only when the app registration itself needs updating
 
 ```powershell
 az deployment tenant create --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
-```
-
-## Validate the entra application output
-
-```powershell
-az deployment tenant show --name tango-entra-deployment --query properties.outputs -o json
 ```
 
 ## Check service plan tier
