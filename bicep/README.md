@@ -16,47 +16,47 @@ az login --scope [https://graph.microsoft.com/.default](https://graph.microsoft.
 
 ## Run commands
 
-# Get subscription suffix
+### Get subscription suffix
 
 ```powershell
 $subscriptionId = az account show --query id -o tsv
 $suffix = $subscriptionId.Substring($subscriptionId.Length - 4, 4)
 ```
 
-# Get Entra tenant ID
+### Get Entra tenant ID
 
 ```powershell
 $entraTenantId = az account show --query tenantId -o tsv
 ```
 
-# Get Entra app registration client ID
+### Get Entra app registration client ID
 
 ```powershell
 $entraClientId = az ad app list --display-name "tango-auth-$suffix" --query "[0].appId" -o tsv
 ```
 
-# Get App Service hostname
+### Get App Service hostname
 ```powershell
 $webAppHostName = az webapp show --name "tangoapp-$suffix" --resource-group "tango-$suffix" --query defaultHostName -o tsv
 ```
 
-# Validate main.bicep
+### Validate main.bicep
 
 ```powershell
 az deployment sub validate --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast entraClientId=$entraClientId entraTenantId=$entraTenantId
 ```
 
-# Validate entra.bicep
+### Validate entra.bicep
 ```powershell
 az deployment tenant validate --name tango-entra-validation --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
 ```
 
-# Deploy main.bicep
+### Deploy main.bicep
 ```powershell
 az deployment sub create --name tango-deployment --location japaneast --template-file main.bicep --parameters location=japaneast entraClientId=$entraClientId entraTenantId=$entraTenantId --no-wait
 ```
 
-# Deploy entra.bicep only when the app registration itself needs updating
+### Deploy entra.bicep only when the app registration itself needs updating
 
 ```powershell
 az deployment tenant create --name tango-entra-deployment --location japaneast --template-file entra.bicep --parameters suffix=$suffix webAppHostName=$webAppHostName
