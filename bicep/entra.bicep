@@ -9,8 +9,10 @@ param suffix string
 param webAppHostName string
 
 var appDisplayName = 'tango-auth-${suffix}'
+var appUniqueName = 'tango-auth-${suffix}'
 
 resource appRegistration 'Microsoft.Graph/applications@v1.0' = {
+  uniqueName: appUniqueName
   displayName: appDisplayName
   signInAudience: 'AzureADMyOrg'
   web: {
