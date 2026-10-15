@@ -79,9 +79,8 @@ output = root.parent / "tangoapp.zip"
 files = [
     "app.py",
     "cloudflare_ai.py",
-    "github_client.py",
     "requirements.txt",
-    "templates/style.cssl",
+    "templates/style.css",
     "templates/app.js",
     "templates/add_vocabulary.html",
     "templates/index.html",
