@@ -31,7 +31,7 @@ def run_ai(messages: list[dict]) -> dict:
             "Content-Type": "application/json",
         },
         json={"messages": messages},
-        timeout=(10,60),
+        timeout=(10,120),
     )
 
     response.raise_for_status()

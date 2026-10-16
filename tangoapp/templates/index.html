@@ -1,4 +1,4 @@
-i<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -91,6 +91,7 @@ i<!DOCTYPE html>
             text-align: center;
             touch-action: pan-y;
             user-select: none;
+            cursor: pointer;
         }
 
         .card-label {
@@ -288,7 +289,7 @@ i<!DOCTYPE html>
         <header>
             <div>
                 <h1>Tango</h1>
-                <div class="subtitle">Japanese vocabulary practice</div>
+                <div class="subtitle">復習アプリ</div>
             </div>
         </header>
 
@@ -356,7 +357,7 @@ i<!DOCTYPE html>
                 </div>
 
                 <div class="hint">
-                    Use ← and → arrow keys, or swipe the card.
+                    Tap the card to reveal the reading and meaning. Use ← and →, or swipe to rate your answer.
                 </div>
             </div>
         </section>
@@ -447,6 +448,8 @@ i<!DOCTYPE html>
         let correctedWords = new Set();
         let completedRounds = 0;
         let answerRevealed = false;
+        let answerShownAsFeedback = false;
+        let suppressNextCardClick = false;
         let sessionFinished = false;
 
         function shuffle(array) {
@@ -474,7 +477,7 @@ i<!DOCTYPE html>
             exampleElement.classList.add("hidden");
         }
 
-        function showAnswer(item) {
+        function showAnswer(item, asMissedFeedback = false) {
             readingElement.textContent = item.reading || "";
             meaningElement.textContent = item.meaning || "";
 
@@ -493,9 +496,18 @@ i<!DOCTYPE html>
             );
 
             answerRevealed = true;
-            cardLabel.textContent = "Answer";
-            missedButton.textContent = "← Next";
-            rememberedButton.textContent = "Next →";
+            answerShownAsFeedback = asMissedFeedback;
+            cardLabel.textContent = asMissedFeedback
+                ? "Answer"
+                : "Reading and meaning — did you remember?";
+
+            if (asMissedFeedback) {
+                missedButton.textContent = "← Next";
+                rememberedButton.textContent = "Next →";
+            } else {
+                missedButton.textContent = "← Didn't remember";
+                rememberedButton.textContent = "Remembered →";
+            }
         }
 
         function updateProgress() {
@@ -527,6 +539,7 @@ i<!DOCTYPE html>
             hideAnswer();
 
             answerRevealed = false;
+            answerShownAsFeedback = false;
             cardLabel.textContent = "What does this word mean?";
             missedButton.textContent = "← Didn't remember";
             rememberedButton.textContent = "Remembered →";
@@ -541,6 +554,28 @@ i<!DOCTYPE html>
 
             if (!answerRevealed) {
                 showAnswer(currentDeck[currentIndex]);
+                return;
+            }
+
+            if (!answerShownAsFeedback) {
+                hideAnswer();
+                answerRevealed = false;
+                cardLabel.textContent = "What does this word mean?";
+                missedButton.textContent = "← Didn't remember";
+                rememberedButton.textContent = "Remembered →";
+            }
+        }
+
+        function recordMissed(item) {
+            if (currentRound === 1) {
+                if (!missedThisRound.some(missed => missed.word === item.word)) {
+                    missedThisRound.push(item);
+                }
+                if (!missedFirstRound.some(missed => missed.word === item.word)) {
+                    missedFirstRound.push(item);
+                }
+            } else if (!missedThisRound.some(missed => missed.word === item.word)) {
+                missedThisRound.push(item);
             }
         }
 
@@ -549,7 +584,31 @@ i<!DOCTYPE html>
                 return;
             }
 
-            if (answerRevealed) {
+            const item = currentDeck[currentIndex];
+
+            if (answerShownAsFeedback) {
+                currentIndex++;
+                renderCard();
+                return;
+            }
+
+            recordMissed(item);
+
+            if (!answerRevealed) {
+                showAnswer(item, true);
+                return;
+            }
+
+            currentIndex++;
+            renderCard();
+        }
+
+        function markRemembered() {
+            if (sessionFinished || currentIndex >= currentDeck.length) {
+                return;
+            }
+
+            if (answerShownAsFeedback) {
                 currentIndex++;
                 renderCard();
                 return;
@@ -558,37 +617,9 @@ i<!DOCTYPE html>
             const item = currentDeck[currentIndex];
 
             if (currentRound === 1) {
-                missedThisRound.push(item);
-
-                if (!missedFirstRound.some(
-                    missed => missed.word === item.word
-                )) {
-                    missedFirstRound.push(item);
-                }
+                firstRoundRemembered.add(item.word);
             } else {
-                if (!missedThisRound.some(
-                    missed => missed.word === item.word
-                )) {
-                    missedThisRound.push(item);
-                }
-            }
-
-            showAnswer(item);
-        }
-
-        function markRemembered() {
-            if (sessionFinished || currentIndex >= currentDeck.length) {
-                return;
-            }
-
-            const item = currentDeck[currentIndex];
-
-            if (!answerRevealed) {
-                if (currentRound === 1) {
-                    firstRoundRemembered.add(item.word);
-                } else {
-                    correctedWords.add(item.word);
-                }
+                correctedWords.add(item.word);
             }
 
             currentIndex++;
@@ -686,6 +717,7 @@ i<!DOCTYPE html>
             correctedWords = new Set();
             completedRounds = 0;
             answerRevealed = false;
+            answerShownAsFeedback = false;
             sessionFinished = false;
 
             summarySection.classList.add("hidden");
@@ -766,6 +798,21 @@ i<!DOCTYPE html>
             touchStartY = event.touches[0].clientY;
         }, { passive: true });
 
+        flashcard.addEventListener("click", event => {
+            if (suppressNextCardClick) {
+                suppressNextCardClick = false;
+                return;
+            }
+            revealCurrentAnswer();
+        });
+
+        flashcard.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                revealCurrentAnswer();
+            }
+        });
+
         flashcard.addEventListener("touchend", event => {
             if (
                 touchStartX === null ||
@@ -789,8 +836,10 @@ i<!DOCTYPE html>
             }
 
             if (deltaX < 0) {
+                suppressNextCardClick = true;
                 markMissed();
             } else {
+                suppressNextCardClick = true;
                 markRemembered();
             }
         }, { passive: true });

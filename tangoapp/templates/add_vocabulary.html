@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Add Vocabulary | Tango</title>
+  <title>Add Vocabulary | 単語</title>
   <style>
     :root { color-scheme: light dark; --bg:#f5f6f8; --panel:#fff; --text:#20242b; --muted:#687180; --line:#d9dee7; --accent:#315bd6; --danger:#b42318; --success:#167647; }
     @media (prefers-color-scheme: dark) { :root { --bg:#15171b; --panel:#202329; --text:#f2f4f7; --muted:#aab2bf; --line:#3b414c; --accent:#8aa7ff; --danger:#ff938a; --success:#7dd9a7; } }
@@ -62,14 +62,14 @@
 
   <section id="jisho-section" class="panel hidden" aria-labelledby="jisho-heading">
     <h2 id="jisho-heading">Jisho reference</h2>
-    <p class="muted">Choose a result below. You can copy only its reading, only its meaning, or both into the editable AI fields. Your example sentence and translation will not be changed.</p>
+    <p class="muted">Choose a result below to copy its reading and/or meaning. Each selection also asks AI to try to create an example sentence and translation. If AI is unavailable, you can still save with those two fields blank.</p>
     <div id="jisho-status" class="status" role="status" aria-live="polite"></div>
     <div id="jisho-results"></div>
   </section>
 
   <section id="preview-section" class="panel hidden" aria-labelledby="preview-heading">
     <h2 id="preview-heading">2. Review and edit entry</h2>
-    <p class="muted">These are the values that will be saved. Jisho selections update only the fields you choose.</p>
+    <p class="muted">These are the values that will be saved. Word, reading, and meaning are required; example and translation may be blank if AI is unavailable.</p>
     <form id="save-form">
       <div class="grid">
         <div class="field">
@@ -87,11 +87,11 @@
       </div>
       <div class="field">
         <label for="entry-example">Example sentence (Japanese)</label>
-        <textarea id="entry-example" name="example" required></textarea>
+        <textarea id="entry-example" name="example"></textarea>
       </div>
       <div class="field">
         <label for="entry-translation">Example translation (English)</label>
-        <textarea id="entry-translation" name="translation" required></textarea>
+        <textarea id="entry-translation" name="translation"></textarea>
       </div>
       <div class="actions">
         <button class="primary" id="save-button" type="submit">Confirm and save</button>
@@ -172,6 +172,29 @@
     }
   });
 
+  async function tryGenerateJishoExample(result) {
+    const word = fields.word.value.trim() || wordInput.value.trim();
+    const reading = fields.reading.value.trim() || result.reading || '';
+    const meaning = fields.meaning.value.trim() || result.meaning || '';
+    setStatus(saveStatus, 'Jisho values selected. Asking AI to create an example sentence…');
+
+    try {
+      const response = await fetch('/api/vocabulary/enrich-example', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, reading, meaning })
+      });
+      const data = await readResponse(response);
+      fields.example.value = data.example || '';
+      fields.translation.value = data.translation || '';
+      setStatus(saveStatus, 'Jisho values copied and an example was generated. Review the fields before saving.', 'success');
+    } catch (error) {
+      // Example generation is best-effort. Keep any existing text, and allow
+      // the user to save with blank example/translation fields if needed.
+      setStatus(saveStatus, `Jisho values copied, but AI could not generate an example (${error.message || 'request failed'}). You can still save with the example and translation blank.`, 'error');
+    }
+  }
+
   jishoButton.addEventListener('click', async () => {
     const word = (fields.word.value.trim() || wordInput.value.trim());
     if (!word) {
@@ -236,30 +259,33 @@
         useReading.type = 'button';
         useReading.textContent = 'Use reading';
         useReading.disabled = !result.reading;
-        useReading.addEventListener('click', () => {
-          fields.reading.value = result.reading;
+        useReading.addEventListener('click', async () => {
+          fields.word.value = result.word || word;
+          fields.reading.value = result.reading || fields.reading.value;
           previewSection.classList.remove('hidden');
-          setStatus(saveStatus, 'Jisho reading copied into the Reading field. Review before saving.', 'success');
+          await tryGenerateJishoExample(result);
         });
         const useMeaning = document.createElement('button');
         useMeaning.type = 'button';
         useMeaning.textContent = 'Use meaning';
         useMeaning.disabled = !result.meaning;
-        useMeaning.addEventListener('click', () => {
-          fields.meaning.value = result.meaning;
+        useMeaning.addEventListener('click', async () => {
+          fields.word.value = result.word || word;
+          fields.meaning.value = result.meaning || fields.meaning.value;
           previewSection.classList.remove('hidden');
-          setStatus(saveStatus, 'Jisho definitions copied into the Meaning field. Review before saving.', 'success');
+          await tryGenerateJishoExample(result);
         });
         const useBoth = document.createElement('button');
         useBoth.type = 'button';
         useBoth.className = 'primary';
         useBoth.textContent = 'Use both';
         useBoth.disabled = !result.reading && !result.meaning;
-        useBoth.addEventListener('click', () => {
+        useBoth.addEventListener('click', async () => {
+          fields.word.value = result.word || word;
           if (result.reading) fields.reading.value = result.reading;
           if (result.meaning) fields.meaning.value = result.meaning;
           previewSection.classList.remove('hidden');
-          setStatus(saveStatus, 'Selected Jisho values copied into the draft. Review before saving.', 'success');
+          await tryGenerateJishoExample(result);
         });
         const link = document.createElement('a');
         link.href = result.url || `https://jisho.org/search/${encodeURIComponent(word)}`;
@@ -293,7 +319,8 @@
       });
       const data = await readResponse(response);
       const destination = data.destination === 'github' ? 'GitHub' : 'the local database';
-      setStatus(saveStatus, `Saved successfully to ${destination}.`, 'success');
+      const hasExample = Boolean(entry.example && entry.translation);
+      setStatus(saveStatus, `Saved successfully to ${destination}.${hasExample ? '' : ' This entry has no example sentence or translation.'}`, 'success');
     } catch (error) {
       setStatus(saveStatus, error.message || 'Could not save the entry.', 'error');
     } finally {
@@ -313,4 +340,3 @@
 </script>
 </body>
 </html>
-

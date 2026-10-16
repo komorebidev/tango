@@ -418,16 +418,63 @@ def jisho_vocabulary():
     return jsonify({"word": word, "results": results})
 
 
+@app.route("/api/vocabulary/enrich-example", methods=["POST"])
+def enrich_vocabulary_example():
+    """Try to generate an example and translation for a Jisho-selected entry."""
+    data = request.get_json(silent=True) or {}
+    word = str(data.get("word", "")).strip()
+    reading = str(data.get("reading", "")).strip()
+    meaning = str(data.get("meaning", "")).strip()
+
+    if not word:
+        return jsonify({"error": "A Japanese word is required."}), 400
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You create a Japanese vocabulary flashcard for a learner. "
+                "Return exactly one JSON object, with no Markdown or explanation, "
+                "containing only these string fields: example, translation. "
+                "example must be one natural, concise Japanese sentence that uses "
+                "the supplied word naturally. translation must be its accurate "
+                "English translation. Do not invent a different word or reading."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Word: {word}\nReading: {reading or 'not supplied'}\n"
+                f"Meaning: {meaning or 'not supplied'}\n"
+                "Create one suitable example sentence and its English translation."
+            ),
+        },
+    ]
+
+    try:
+        ai_result = run_ai(messages)
+        entry, raw_output = extract_ai_json(ai_result)
+        example = str(entry.get("example", "")).strip()
+        translation = str(entry.get("translation", "")).strip()
+        if not example or not translation:
+            raise ValueError("The AI response did not provide both an example and translation.")
+        return jsonify({"example": example, "translation": translation})
+    except Exception as exc:
+        app.logger.exception("Jisho vocabulary example generation failed")
+        return jsonify({"error": str(exc)}), 502
+
+
 @app.route("/api/vocabulary/save", methods=["POST"])
 def save_vocabulary_entry():
     data = request.get_json(silent=True) or {}
     fields = ["word", "reading", "meaning", "example", "translation"]
     entry = {field: str(data.get(field, "")).strip() for field in fields}
 
-    missing = [field for field in fields if not entry[field]]
+    required_fields = ["word", "reading", "meaning"]
+    missing = [field for field in required_fields if not entry[field]]
     if missing:
         return jsonify(
-            {"error": "Please fill in all fields before saving."}
+            {"error": "Word, reading, and meaning are required. Example and translation may be blank."}
         ), 400
 
     try:
