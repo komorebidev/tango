@@ -1,5 +1,10 @@
 [
   {
+    "word": "厚かましい",
+    "reading": "あつかましい",
+    "meaning": "pushy; shameless; impudent"
+  },
+  {
     "word": "誤り、謬り、謬",
     "reading": "あやまり",
     "meaning": "error; mistake; slip; bug",
@@ -14,6 +19,11 @@
     "translation": "He apologizes to me."
   },
   {
+    "word": "経緯",
+    "reading": "いきさつ",
+    "meaning": "circumstances; background; sequence of events"
+  },
+  {
     "word": "育児",
     "reading": "いくじ",
     "meaning": "childcare; child-rearing",
@@ -26,11 +36,36 @@
     "meaning": "showing intent"
   },
   {
+    "word": "偽って",
+    "reading": "いつわって",
+    "meaning": "falsely; by pretending; under false pretenses"
+  },
+  {
     "word": "嘘っぺらい",
     "reading": "うそっぺらい",
     "meaning": "false; untrue; not real",
     "example": "あの人の言い分は嘘っぺらいから、信用しないほうがいい。",
     "translation": "His claim is false, so you'd better not trust it."
+  },
+  {
+    "word": "烏滸がましい",
+    "reading": "おこがましい",
+    "meaning": "presumptuous; impudent; cheeky"
+  },
+  {
+    "word": "面白がって",
+    "reading": "おもしろがって",
+    "meaning": "finding something amusing; taking an interest in"
+  },
+  {
+    "word": "かけがえのない",
+    "reading": "かけがえのない",
+    "meaning": "irreplaceable; invaluable"
+  },
+  {
+    "word": "過信",
+    "reading": "かしん",
+    "meaning": "overconfidence; excessive confidence"
   },
   {
     "word": "かつて",
@@ -47,6 +82,11 @@
     "translation": "I am grateful to my teacher."
   },
   {
+    "word": "干渉",
+    "reading": "かんしょう",
+    "meaning": "interference; meddling"
+  },
+  {
     "word": "感心",
     "reading": "かんしん",
     "meaning": "to be impressed; to admire",
@@ -61,14 +101,39 @@
     "translation": "She let out an exclamation of admiration at the beautiful scenery."
   },
   {
+    "word": "究極",
+    "reading": "きゅうきょく",
+    "meaning": "ultimate; extreme"
+  },
+  {
+    "word": "グル",
+    "reading": "ぐる",
+    "meaning": "accomplice; someone in cahoots"
+  },
+  {
+    "word": "景気",
+    "reading": "けいき",
+    "meaning": "economic conditions; business conditions"
+  },
+  {
     "word": "傾向",
     "reading": "けいこう",
     "meaning": "tendency"
   },
   {
+    "word": "潔癖症",
+    "reading": "けっぺきしょう",
+    "meaning": "obsessive cleanliness; strong aversion to dirt or germs (not exactly the same as OCD)"
+  },
+  {
     "word": "謙遜する",
     "reading": "けんそんする",
     "meaning": "be modest"
+  },
+  {
+    "word": "工作",
+    "reading": "こうさく",
+    "meaning": "craftwork; construction; maneuvering (context-dependent)"
   },
   {
     "word": "降順",
@@ -112,6 +177,11 @@
     "translation": "Please sit with good posture."
   },
   {
+    "word": "私生活",
+    "reading": "しせいかつ",
+    "meaning": "private life; personal life"
+  },
+  {
     "word": "子孫",
     "reading": "しそん",
     "meaning": "descendants"
@@ -134,6 +204,11 @@
     "meaning": "success in life"
   },
   {
+    "word": "小心者",
+    "reading": "しょうしんもの",
+    "meaning": "coward; timid person"
+  },
+  {
     "word": "昇順",
     "reading": "しょうじゅん",
     "meaning": "ascending order",
@@ -153,11 +228,21 @@
     "meaning": "particle"
   },
   {
+    "word": "数字的に",
+    "reading": "すうじてきに",
+    "meaning": "numerically; in numerical terms"
+  },
+  {
     "word": "生産性",
     "reading": "せいさんせい",
     "meaning": "productivity",
     "example": "新しいシステムのおかげで生産性が上がった。",
     "translation": "Thanks to the new system, productivity increased."
+  },
+  {
+    "word": "制約",
+    "reading": "せいやく",
+    "meaning": "restriction; constraint; limitation"
   },
   {
     "word": "整理券",
@@ -170,11 +255,26 @@
     "meaning": "flattery"
   },
   {
+    "word": "説教",
+    "reading": "せっきょう",
+    "meaning": "lecture; sermon; preaching"
+  },
+  {
     "word": "繊細",
     "reading": "せんさい",
     "meaning": "delicate; sensitive; refined",
     "example": "彼女は繊細な性格で、小さな変化にすぐ気づく。",
     "translation": "She has a delicate personality and quickly notices small changes."
+  },
+  {
+    "word": "それどころじゃない",
+    "reading": "それどころじゃない",
+    "meaning": "this is no time for that; that's the least of my concerns"
+  },
+  {
+    "word": "断念",
+    "reading": "だんねん",
+    "meaning": "giving up; abandoning a plan"
   },
   {
     "word": "地位",
@@ -201,9 +301,19 @@
     "translation": "I am planning a long-term trip."
   },
   {
+    "word": "ついでに",
+    "reading": "ついでに",
+    "meaning": "while you're at it; incidentally"
+  },
+  {
     "word": "仕える",
     "reading": "つかえる",
     "meaning": "serve"
+  },
+  {
+    "word": "付き添い",
+    "reading": "つきそい",
+    "meaning": "companion; attendant; chaperone"
   },
   {
     "word": "手柄",
@@ -213,11 +323,26 @@
     "translation": "He took all the credit."
   },
   {
+    "word": "出来心",
+    "reading": "できごころ",
+    "meaning": "passing whim; momentary impulse"
+  },
+  {
+    "word": "なりふり",
+    "reading": "なりふり",
+    "meaning": "appearance; how one looks or dresses"
+  },
+  {
     "word": "成り行き",
     "reading": "なりゆき",
     "meaning": "the outcome; how things turn out; the course of events",
     "example": "成り行きを見てみよう。",
     "translation": "Let's see how things turn out."
+  },
+  {
+    "word": "ノッポ",
+    "reading": "のっぽ",
+    "meaning": "a tall, lanky person"
   },
   {
     "word": "乗り心地",
@@ -227,9 +352,19 @@
     "translation": "This bus has a comfortable ride."
   },
   {
+    "word": "張り込み",
+    "reading": "はりこみ",
+    "meaning": "stakeout; surveillance"
+  },
+  {
     "word": "筆者",
     "reading": "ひっしゃ",
     "meaning": "writer"
+  },
+  {
+    "word": "人並み",
+    "reading": "ひとなみ",
+    "meaning": "average; ordinary; on par with others"
   },
   {
     "word": "侮辱的",
@@ -246,6 +381,21 @@
     "translation": "He has been targeted by his boss and is always watched closely."
   },
   {
+    "word": "黙認",
+    "reading": "もくにん",
+    "meaning": "tacit approval; turning a blind eye"
+  },
+  {
+    "word": "持たれています",
+    "reading": "もたれています",
+    "meaning": "is held; is regarded as (context-dependent; does not inherently mean “accused of”)"
+  },
+  {
+    "word": "やりくり",
+    "reading": "やりくり",
+    "meaning": "making do; managing money, time, or resources"
+  },
+  {
     "word": "優美",
     "reading": "ゆうび",
     "meaning": "elegant; graceful; refined",
@@ -260,14 +410,12 @@
     "translation": "I decided to yield my seat."
   },
   {
-    "word": "予防",
-    "reading": "よぼう",
-    "meaning": "prevention",
-    "example": "風邪の予防に、うがいをします。",
-    "translation": "I gargle to prevent catching a cold."
+    "word": "要因",
+    "reading": "よういん",
+    "meaning": "factor; contributing cause"
   },
   {
-    "word": "私生活",
+    "word": "予防",
     "reading": "よぼう",
     "meaning": "prevention",
     "example": "風邪の予防に、うがいをします。",
@@ -279,5 +427,10 @@
     "meaning": "spiral",
     "example": "螺旋階段をのぼっていくと、展望台にたどりつく。",
     "translation": "If you climb the spiral staircase, you will arrive at the observation deck."
+  },
+  {
+    "word": "臨時休業",
+    "reading": "りんじきゅうぎょう",
+    "meaning": "temporary closure"
   }
 ]
