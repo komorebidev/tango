@@ -5,6 +5,12 @@
 
 ## Important Note
 
+### Azure App Service secrets get reset on redeploy
+
+* The bicep sets them as blank each redeploy
+* This is because Azure key vault is not being used
+* To improve this, using key vault and referencing those values instead will avoid this issue
+
 ### Troubleshooting: Bicep Microsoft Graph Deployment Error (`403 Forbidden`)
 
 Even as a Global Admin, deploying Bicep files that use Microsoft Graph from Cloud Shell fails with a `403 Forbidden` error because Cloud Shell's default session uses an Azure token instead of a Microsoft Graph token.
