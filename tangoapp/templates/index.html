@@ -65,6 +65,63 @@
             margin: 0 0 24px;
         }
 
+        .level-picker {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-top: 20px;
+        }
+
+        .level-picker h2 {
+            margin: 0 0 8px;
+        }
+
+        .level-picker p {
+            color: #666;
+            margin: 0 0 18px;
+            line-height: 1.5;
+        }
+
+        .level-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .level-button {
+            min-height: 104px;
+            background: #e9edf5;
+            color: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .level-button strong {
+            font-size: 1.05rem;
+        }
+
+        .level-button span {
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .level-button.recommended {
+            background: #e5f7eb;
+            color: #197341;
+        }
+
+        .saved-progress-note {
+            color: #888;
+            font-size: 0.82rem;
+            margin-top: 14px !important;
+            margin-bottom: 0 !important;
+        }
+
         .progress-section {
             margin-bottom: 20px;
         }
@@ -296,6 +353,18 @@
             .summary-actions {
                 flex-direction: column;
             }
+
+            .level-picker {
+                padding: 20px 16px;
+            }
+
+            .level-options {
+                grid-template-columns: 1fr;
+            }
+
+            .level-button {
+                min-height: 72px;
+            }
         }
     </style>
 </head>
@@ -314,7 +383,31 @@
             Completed study sessions: <span id="visit-count">{{ visit_count }}</span>
         </p>
 
-        <section id="study-section">
+        <section id="level-section" class="level-picker hidden">
+            <h2>Choose your study level</h2>
+            <p>Choose how many words to study in this session.</p>
+
+            <div class="level-options">
+                <button type="button" class="level-button" data-size="10">
+                    <strong>Light</strong>
+                    <span>10 words</span>
+                </button>
+                <button type="button" class="level-button recommended" data-size="20">
+                    <strong>Standard</strong>
+                    <span>20 words</span>
+                </button>
+                <button type="button" class="level-button" data-size="40">
+                    <strong>Intensive</strong>
+                    <span>40 words</span>
+                </button>
+            </div>
+
+            <p class="saved-progress-note">
+                Your place in the vocabulary cycle is saved in this browser.
+            </p>
+        </section>
+
+        <section id="study-section" class="hidden">
             <div class="progress-section">
                 <div class="progress-labels">
                     <span id="round-label">Round 1</span>
@@ -419,13 +512,14 @@
                     class="remembered-button"
                     id="restart-button"
                 >
-                    Restart session
+                    Choose another session
                 </button>
             </div>
         </section>
     </main>
 
     <script>
+        const levelSection = document.getElementById("level-section");
         const studySection = document.getElementById("study-section");
         const summarySection = document.getElementById("summary-section");
 
@@ -457,6 +551,13 @@
         let originalDeck = [];
         let currentDeck = [];
         let currentIndex = 0;
+        let shuffleBag = [];
+        let nextBagIndex = 0;
+        let sessionStartIndex = 0;
+        let selectedSessionSize = 20;
+        let shuffleCycle = 1;
+
+        const SHUFFLE_BAG_KEY = "tango-study-shuffle-bag-v1";
         let currentRound = 1;
 
         let missedThisRound = [];
@@ -479,6 +580,91 @@
             }
 
             return result;
+        }
+
+        function getVocabularyWords() {
+            return originalDeck.map(item => item.word);
+        }
+
+        function saveShuffleProgress() {
+            try {
+                localStorage.setItem(
+                    SHUFFLE_BAG_KEY,
+                    JSON.stringify({
+                        version: 1,
+                        vocabularyWords: getVocabularyWords(),
+                        shuffledWords: shuffleBag,
+                        nextIndex: nextBagIndex,
+                        cycle: shuffleCycle
+                    })
+                );
+            } catch (error) {
+                console.warn("Could not save Tango study progress:", error);
+            }
+        }
+
+        function loadShuffleProgress() {
+            const vocabularyWords = getVocabularyWords();
+            const vocabularyWordSet = new Set(vocabularyWords);
+
+            try {
+                const saved = JSON.parse(
+                    localStorage.getItem(SHUFFLE_BAG_KEY) || "null"
+                );
+
+                const validSavedState =
+                    saved &&
+                    saved.version === 1 &&
+                    Array.isArray(saved.vocabularyWords) &&
+                    Array.isArray(saved.shuffledWords) &&
+                    saved.vocabularyWords.length === vocabularyWords.length &&
+                    new Set(saved.vocabularyWords).size === vocabularyWords.length &&
+                    saved.vocabularyWords.every(word => vocabularyWordSet.has(word)) &&
+                    saved.shuffledWords.length === vocabularyWords.length &&
+                    new Set(saved.shuffledWords).size === vocabularyWords.length &&
+                    saved.shuffledWords.every(word => vocabularyWordSet.has(word)) &&
+                    Number.isInteger(saved.nextIndex) &&
+                    saved.nextIndex >= 0 &&
+                    saved.nextIndex <= saved.shuffledWords.length &&
+                    Number.isInteger(saved.cycle) &&
+                    saved.cycle >= 1;
+
+                if (validSavedState) {
+                    shuffleBag = saved.shuffledWords;
+                    nextBagIndex = saved.nextIndex;
+                    shuffleCycle = saved.cycle;
+                    return;
+                }
+            } catch (error) {
+                console.warn("Could not read Tango study progress:", error);
+            }
+
+            // Rebuild only study order if vocabulary or saved progress changed.
+            shuffleBag = shuffle(vocabularyWords);
+            nextBagIndex = 0;
+            shuffleCycle = 1;
+            saveShuffleProgress();
+        }
+
+        function getNextSessionWords(size) {
+            // Start a new cycle only after every word in the current cycle
+            // has been assigned to a completed session.
+            if (nextBagIndex >= shuffleBag.length) {
+                shuffleBag = shuffle(getVocabularyWords());
+                nextBagIndex = 0;
+                shuffleCycle++;
+                saveShuffleProgress();
+            }
+
+            sessionStartIndex = nextBagIndex;
+            const endIndex = Math.min(
+                sessionStartIndex + size,
+                shuffleBag.length
+            );
+            // Preserve the order selected by the shuffle bag.
+            return shuffleBag
+                .slice(sessionStartIndex, endIndex)
+                .map(word => originalDeck.find(item => item.word === word));
         }
 
         function getExampleJapanese(item) {
@@ -680,6 +866,14 @@
 
             sessionFinished = true;
 
+            // Advance only after the main round and missed-word review finish.
+            // If a session is abandoned, the same batch will be offered again.
+            nextBagIndex = Math.min(
+                sessionStartIndex + selectedSessionSize,
+                shuffleBag.length
+            );
+            saveShuffleProgress();
+
             studySection.classList.add("hidden");
             summarySection.classList.remove("hidden");
 
@@ -748,11 +942,25 @@
             renderCard();
         }
 
-        function restartSession() {
-            currentDeck = shuffle(originalDeck);
+        function returnToLevelSelection() {
+            summarySection.classList.add("hidden");
+            studySection.classList.add("hidden");
+            levelSection.classList.remove("hidden");
+        }
+
+        function startSession(size) {
+            currentDeck = getNextSessionWords(size);
+            selectedSessionSize = currentDeck.length;
+
+            if (currentDeck.length === 0 || currentDeck.some(item => !item)) {
+                levelSection.classList.add("hidden");
+                errorMessage.textContent = "No valid vocabulary is available for study.";
+                errorMessage.classList.remove("hidden");
+                return;
+            }
+
             currentIndex = 0;
             currentRound = 1;
-
             missedThisRound = [];
             missedFirstRound = [];
             firstRoundRemembered = new Set();
@@ -763,6 +971,7 @@
             sessionFinished = false;
             sessionCounted = false;
 
+            levelSection.classList.add("hidden");
             summarySection.classList.add("hidden");
             studySection.classList.remove("hidden");
             loading.classList.add("hidden");
@@ -789,7 +998,17 @@
                 }
 
                 originalDeck = vocabulary;
-                restartSession();
+
+                const wordNames = getVocabularyWords();
+                if (new Set(wordNames).size !== wordNames.length) {
+                    throw new Error(
+                        "Each vocabulary entry must have a unique word for reliable study tracking."
+                    );
+                }
+
+                loadShuffleProgress();
+                loading.classList.add("hidden");
+                levelSection.classList.remove("hidden");
             } catch (error) {
                 loading.classList.add("hidden");
                 errorMessage.textContent =
@@ -801,7 +1020,13 @@
         missedButton.addEventListener("click", markMissed);
         rememberedButton.addEventListener("click", markRemembered);
         reviewButton.addEventListener("click", startReviewAgain);
-        restartButton.addEventListener("click", restartSession);
+        restartButton.addEventListener("click", returnToLevelSelection);
+
+        document.querySelectorAll(".level-button").forEach(button => {
+            button.addEventListener("click", () => {
+                startSession(Number(button.dataset.size));
+            });
+        });
 
         document.addEventListener("keydown", event => {
             if (
