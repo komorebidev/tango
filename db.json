@@ -387,6 +387,13 @@
     "translation": "This bus has a comfortable ride."
   },
   {
+    "word": "配車",
+    "reading": "はいしゃ",
+    "meaning": "vehicle dispatch",
+    "example": "配車はすぐに対応します。",
+    "translation": "We will arrange the vehicle dispatch immediately."
+  },
+  {
     "word": "張り込み",
     "reading": "はりこみ",
     "meaning": "stakeout; surveillance"
