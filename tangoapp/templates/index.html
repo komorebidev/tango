@@ -311,7 +311,7 @@
         </header>
 
         <p class="visit-counter">
-            Site visits: {{ visit_count }}
+            Completed study sessions: <span id="visit-count">{{ visit_count }}</span>
         </p>
 
         <section id="study-section">
@@ -468,6 +468,7 @@
         let answerShownAsFeedback = false;
         let suppressNextCardClick = false;
         let sessionFinished = false;
+        let sessionCounted = false;
 
         function shuffle(array) {
             const result = [...array];
@@ -673,6 +674,10 @@
         }
 
         function finishSession() {
+            if (sessionFinished) {
+                return;
+            }
+
             sessionFinished = true;
 
             studySection.classList.add("hidden");
@@ -704,6 +709,26 @@
                 "hidden",
                 missedFirstRound.length === 0
             );
+
+            // Count this completed session once. Optional review-again rounds
+            // remain part of the same session and must not increment again.
+            if (!sessionCounted) {
+                sessionCounted = true;
+                fetch("/api/study-session/complete", { method: "POST" })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Could not record completed study session.");
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        document.getElementById("visit-count").textContent =
+                            result.count;
+                    })
+                    .catch(error => {
+                        console.error("Failed to record completed study session:", error);
+                    });
+            }
         }
 
         function startReviewAgain() {
@@ -736,6 +761,7 @@
             answerRevealed = false;
             answerShownAsFeedback = false;
             sessionFinished = false;
+            sessionCounted = false;
 
             summarySection.classList.add("hidden");
             studySection.classList.remove("hidden");
