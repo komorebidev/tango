@@ -52,7 +52,41 @@ storage_credential = (
 )
 
 
-def get_visit_count():
+def read_visit_count():
+    """Read the existing counter without incrementing it."""
+    if storage_credential is None:
+        with visits_lock:
+            try:
+                if VISITS_FILE.exists():
+                    data = json.loads(VISITS_FILE.read_text(encoding="utf-8"))
+                    if not isinstance(data, dict):
+                        raise ValueError("visits.json must contain a JSON object.")
+                    return int(data.get("count", 0))
+            except (OSError, ValueError, TypeError, json.JSONDecodeError):
+                app.logger.exception("Could not read local visits.json")
+            return 0
+
+    blob = BlobClient(
+        account_url=AZURE_STORAGE_ACCOUNT_URL,
+        container_name=AZURE_STORAGE_CONTAINER_NAME,
+        blob_name=VISITS_BLOB_NAME,
+        credential=storage_credential,
+    )
+    try:
+        data = json.loads(blob.download_blob().readall())
+        if not isinstance(data, dict):
+            raise ValueError("visits.json must contain a JSON object.")
+        return int(data.get("count", 0))
+    except ResourceNotFoundError:
+        return 0
+    except (ValueError, TypeError, json.JSONDecodeError):
+        app.logger.exception("Could not parse visits.json")
+        return 0
+    finally:
+        blob.close()
+
+
+def increment_visit_count():
     # Local development: use visits.json on disk.
     if storage_credential is None:
         with visits_lock:
@@ -283,7 +317,17 @@ def extract_ai_json(ai_result):
 
 @app.route("/")
 def index():
-    return render_template("index.html", visit_count=get_visit_count())
+    return render_template("index.html", visit_count=read_visit_count())
+
+
+@app.route("/api/study-session/complete", methods=["POST"])
+def complete_study_session():
+    try:
+        count = increment_visit_count()
+        return jsonify({"count": count})
+    except Exception:
+        app.logger.exception("Could not record completed study session")
+        return jsonify({"error": "Could not record completed study session."}), 500
 
 
 @app.route("/add-vocabulary")
@@ -418,63 +462,16 @@ def jisho_vocabulary():
     return jsonify({"word": word, "results": results})
 
 
-@app.route("/api/vocabulary/enrich-example", methods=["POST"])
-def enrich_vocabulary_example():
-    """Try to generate an example and translation for a Jisho-selected entry."""
-    data = request.get_json(silent=True) or {}
-    word = str(data.get("word", "")).strip()
-    reading = str(data.get("reading", "")).strip()
-    meaning = str(data.get("meaning", "")).strip()
-
-    if not word:
-        return jsonify({"error": "A Japanese word is required."}), 400
-
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You create a Japanese vocabulary flashcard for a learner. "
-                "Return exactly one JSON object, with no Markdown or explanation, "
-                "containing only these string fields: example, translation. "
-                "example must be one natural, concise Japanese sentence that uses "
-                "the supplied word naturally. translation must be its accurate "
-                "English translation. Do not invent a different word or reading."
-            ),
-        },
-        {
-            "role": "user",
-            "content": (
-                f"Word: {word}\nReading: {reading or 'not supplied'}\n"
-                f"Meaning: {meaning or 'not supplied'}\n"
-                "Create one suitable example sentence and its English translation."
-            ),
-        },
-    ]
-
-    try:
-        ai_result = run_ai(messages)
-        entry, raw_output = extract_ai_json(ai_result)
-        example = str(entry.get("example", "")).strip()
-        translation = str(entry.get("translation", "")).strip()
-        if not example or not translation:
-            raise ValueError("The AI response did not provide both an example and translation.")
-        return jsonify({"example": example, "translation": translation})
-    except Exception as exc:
-        app.logger.exception("Jisho vocabulary example generation failed")
-        return jsonify({"error": str(exc)}), 502
-
-
 @app.route("/api/vocabulary/save", methods=["POST"])
 def save_vocabulary_entry():
     data = request.get_json(silent=True) or {}
     fields = ["word", "reading", "meaning", "example", "translation"]
     entry = {field: str(data.get(field, "")).strip() for field in fields}
 
-    required_fields = ["word", "reading", "meaning"]
-    missing = [field for field in required_fields if not entry[field]]
+    missing = [field for field in fields if not entry[field]]
     if missing:
         return jsonify(
-            {"error": "Word, reading, and meaning are required. Example and translation may be blank."}
+            {"error": "Please fill in all fields before saving."}
         ), 400
 
     try:
