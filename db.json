@@ -2,7 +2,9 @@
   {
     "word": "厚かましい",
     "reading": "あつかましい",
-    "meaning": "pushy; shameless; impudent"
+    "meaning": "pushy; shameless; impudent",
+    "example": "初対面なのにお金を貸してほしいと言うなんて、厚かましい人だ。",
+    "translation": "What a shameless person to ask for money when we have just met."
   },
   {
     "word": "誤り、謬り、謬",
@@ -21,7 +23,9 @@
   {
     "word": "経緯",
     "reading": "いきさつ",
-    "meaning": "circumstances; background; sequence of events"
+    "meaning": "circumstances; background; sequence of events",
+    "example": "この問題が起きた経緯を説明してください。",
+    "translation": "Please explain the circumstances that led to this problem."
   },
   {
     "word": "育児",
@@ -33,12 +37,16 @@
   {
     "word": "意思表示",
     "reading": "いしひょうじ",
-    "meaning": "showing intent"
+    "meaning": "showing intent",
+    "example": "賛成か反対か、はっきり意思表示してください。",
+    "translation": "Please clearly indicate whether you agree or disagree."
   },
   {
     "word": "偽って",
     "reading": "いつわって",
-    "meaning": "falsely; by pretending; under false pretenses"
+    "meaning": "falsely; by pretending; under false pretenses",
+    "example": "彼は名前を偽ってホテルに泊まった。",
+    "translation": "He stayed at the hotel under a false name."
   },
   {
     "word": "嘘っぺらい",
@@ -50,22 +58,30 @@
   {
     "word": "烏滸がましい",
     "reading": "おこがましい",
-    "meaning": "presumptuous; impudent; cheeky"
+    "meaning": "presumptuous; impudent; cheeky",
+    "example": "私が意見を言うのは烏滸がましいかもしれません。",
+    "translation": "It may be presumptuous of me to offer my opinion."
   },
   {
     "word": "面白がって",
     "reading": "おもしろがって",
-    "meaning": "finding something amusing; taking an interest in"
+    "meaning": "finding something amusing; taking an interest in",
+    "example": "子どもたちは珍しい鳥を面白がって見ていた。",
+    "translation": "The children watched the unusual bird with interest."
   },
   {
     "word": "かけがえのない",
     "reading": "かけがえのない",
-    "meaning": "irreplaceable; invaluable"
+    "meaning": "irreplaceable; invaluable",
+    "example": "友人は私にとってかけがえのない存在だ。",
+    "translation": "My friend is irreplaceable to me."
   },
   {
     "word": "過信",
     "reading": "かしん",
-    "meaning": "overconfidence; excessive confidence"
+    "meaning": "overconfidence; excessive confidence",
+    "example": "自分の知識を過信してはいけない。",
+    "translation": "You must not be overconfident in your knowledge."
   },
   {
     "word": "かつて",
@@ -84,7 +100,9 @@
   {
     "word": "干渉",
     "reading": "かんしょう",
-    "meaning": "interference; meddling"
+    "meaning": "interference; meddling",
+    "example": "他人の家庭の問題に干渉するべきではない。",
+    "translation": "You should not interfere in other people's family matters."
   },
   {
     "word": "感心",
@@ -103,22 +121,30 @@
   {
     "word": "究極",
     "reading": "きゅうきょく",
-    "meaning": "ultimate; extreme"
+    "meaning": "ultimate; extreme",
+    "example": "究極の目標は、誰もが安心して暮らせる社会を作ることだ。",
+    "translation": "The ultimate goal is to create a society where everyone can live safely."
   },
   {
     "word": "グル",
     "reading": "ぐる",
-    "meaning": "accomplice; someone in cahoots"
+    "meaning": "accomplice; someone in cahoots",
+    "example": "二人は詐欺のグルだったことが分かった。",
+    "translation": "It turned out the two were accomplices in the scam."
   },
   {
     "word": "景気",
     "reading": "けいき",
-    "meaning": "economic conditions; business conditions"
+    "meaning": "economic conditions; business conditions",
+    "example": "景気が回復し、店の売り上げも増えてきた。",
+    "translation": "The economy recovered, and the shop's sales began to rise."
   },
   {
     "word": "傾向",
     "reading": "けいこう",
-    "meaning": "tendency"
+    "meaning": "tendency",
+    "example": "最近、若者は新聞を読まない傾向がある。",
+    "translation": "Recently, young people tend not to read newspapers."
   },
   {
     "word": "形状",
@@ -130,17 +156,23 @@
   {
     "word": "潔癖症",
     "reading": "けっぺきしょう",
-    "meaning": "obsessive cleanliness; strong aversion to dirt or germs (not exactly the same as OCD)"
+    "meaning": "obsessive cleanliness; strong aversion to dirt or germs (not exactly the same as OCD)",
+    "example": "彼は潔癖症で、外出先でも何度も手を洗う。",
+    "translation": "He is obsessed with cleanliness and washes his hands repeatedly even when out."
   },
   {
     "word": "謙遜する",
     "reading": "けんそんする",
-    "meaning": "be modest"
+    "meaning": "be modest",
+    "example": "彼女は褒められると、いつも謙遜する。",
+    "translation": "Whenever she is praised, she always plays down her abilities."
   },
   {
     "word": "工作",
     "reading": "こうさく",
-    "meaning": "craftwork; construction; maneuvering (context-dependent)"
+    "meaning": "craftwork; construction; maneuvering (context-dependent)",
+    "example": "子どもたちは紙で動物の工作を作った。",
+    "translation": "The children made animal crafts out of paper."
   },
   {
     "word": "降順",
@@ -152,12 +184,16 @@
   {
     "word": "向上",
     "reading": "こうじょう",
-    "meaning": "improve"
+    "meaning": "improve",
+    "example": "毎日練習して、会話力の向上を目指している。",
+    "translation": "I practice every day to improve my conversation skills."
   },
   {
     "word": "構内",
     "reading": "こうない",
-    "meaning": "premises"
+    "meaning": "premises",
+    "example": "駅の構内では携帯電話での通話を控えてください。",
+    "translation": "Please refrain from talking on your phone inside the station."
   },
   {
     "word": "搾取",
@@ -169,12 +205,16 @@
   {
     "word": "散策",
     "reading": "さんさく",
-    "meaning": "stroll"
+    "meaning": "stroll",
+    "example": "休日に古い町並みを散策した。",
+    "translation": "I strolled through the old town on my day off."
   },
   {
     "word": "酸素",
     "reading": "さんそ",
-    "meaning": "oxygen"
+    "meaning": "oxygen",
+    "example": "人間は生きるために酸素を必要とする。",
+    "translation": "Humans need oxygen to live."
   },
   {
     "word": "姿勢",
@@ -186,17 +226,23 @@
   {
     "word": "私生活",
     "reading": "しせいかつ",
-    "meaning": "private life; personal life"
+    "meaning": "private life; personal life",
+    "example": "彼は仕事と私生活をきちんと分けている。",
+    "translation": "He keeps his work and private life separate."
   },
   {
     "word": "子孫",
     "reading": "しそん",
-    "meaning": "descendants"
+    "meaning": "descendants",
+    "example": "彼らの子孫は世界中に広がった。",
+    "translation": "Their descendants spread throughout the world."
   },
   {
     "word": "支度",
     "reading": "したく",
-    "meaning": "prepare"
+    "meaning": "prepare",
+    "example": "旅行の支度に一時間かかった。",
+    "translation": "It took an hour to get ready for the trip."
   },
   {
     "word": "周囲",
@@ -215,12 +261,16 @@
   {
     "word": "出世",
     "reading": "しゅっせ",
-    "meaning": "success in life"
+    "meaning": "success in life",
+    "example": "彼は努力して若くして出世した。",
+    "translation": "He worked hard and rose through the ranks at a young age."
   },
   {
     "word": "小心者",
     "reading": "しょうしんもの",
-    "meaning": "coward; timid person"
+    "meaning": "coward; timid person",
+    "example": "小心者の彼は、人前で話すとすぐ緊張する。",
+    "translation": "Being timid, he quickly gets nervous when speaking in public."
   },
   {
     "word": "昇順",
@@ -253,12 +303,16 @@
   {
     "word": "助詞",
     "reading": "じょし",
-    "meaning": "particle"
+    "meaning": "particle",
+    "example": "日本語では、助詞が文の意味を決めることがある。",
+    "translation": "In Japanese, particles can determine the meaning of a sentence."
   },
   {
     "word": "数字的に",
     "reading": "すうじてきに",
-    "meaning": "numerically; in numerical terms"
+    "meaning": "numerically; in numerical terms",
+    "example": "数字的に見ると、今年の利益は昨年を上回っている。",
+    "translation": "Numerically, this year's profit exceeds last year's."
   },
   {
     "word": "生産性",
@@ -270,22 +324,30 @@
   {
     "word": "制約",
     "reading": "せいやく",
-    "meaning": "restriction; constraint; limitation"
+    "meaning": "restriction; constraint; limitation",
+    "example": "予算の制約があるため、計画を変更した。",
+    "translation": "We changed the plan because of budget constraints."
   },
   {
     "word": "整理券",
     "reading": "せいりけん",
-    "meaning": "numbered ticket"
+    "meaning": "numbered ticket",
+    "example": "受付で整理券を受け取ってからお待ちください。",
+    "translation": "Please take a numbered ticket at reception and then wait."
   },
   {
     "word": "世辞",
     "reading": "せじ",
-    "meaning": "flattery"
+    "meaning": "flattery",
+    "example": "彼は上司に世辞を言って評価を上げようとした。",
+    "translation": "He tried to improve his standing by flattering his boss."
   },
   {
     "word": "説教",
     "reading": "せっきょう",
-    "meaning": "lecture; sermon; preaching"
+    "meaning": "lecture; sermon; preaching",
+    "example": "先生は宿題を忘れた生徒に説教した。",
+    "translation": "The teacher lectured the student who forgot the homework."
   },
   {
     "word": "宣言",
@@ -304,24 +366,30 @@
   {
     "word": "それどころじゃない",
     "reading": "それどころじゃない",
-    "meaning": "this is no time for that; that's the least of my concerns"
+    "meaning": "this is no time for that; that's the least of my concerns",
+    "example": "明日は試験だから、遊んでいるそれどころじゃない。",
+    "translation": "I have an exam tomorrow, so this is no time to fool around."
   },
   {
     "word": "耐熱",
     "reading": "たいねつ",
     "meaning": "heat-resisting",
-    "example": "",
-    "translation": ""
+    "example": "この耐熱ガラスは熱いお茶を入れても割れにくい。",
+    "translation": "This heat-resistant glass is unlikely to break when filled with hot tea."
   },
   {
     "word": "断念",
     "reading": "だんねん",
-    "meaning": "giving up; abandoning a plan"
+    "meaning": "giving up; abandoning a plan",
+    "example": "悪天候のため、旅行を断念した。",
+    "translation": "We gave up on the trip because of the bad weather."
   },
   {
     "word": "地位",
     "reading": "ちい",
-    "meaning": "status"
+    "meaning": "status",
+    "example": "彼女は努力によって会社で重要な地位を得た。",
+    "translation": "Through hard work, she attained an important position at the company."
   },
   {
     "word": "致命的",
@@ -333,7 +401,9 @@
   {
     "word": "忠実",
     "reading": "ちゅうじつ",
-    "meaning": "faithful"
+    "meaning": "faithful",
+    "example": "この犬は飼い主に忠実だ。",
+    "translation": "This dog is loyal to its owner."
   },
   {
     "word": "長期",
@@ -345,7 +415,9 @@
   {
     "word": "ついでに",
     "reading": "ついでに",
-    "meaning": "while you're at it; incidentally"
+    "meaning": "while you're at it; incidentally",
+    "example": "買い物に行くついでに、郵便局にも寄った。",
+    "translation": "While I was out shopping, I stopped by the post office too."
   },
   {
     "word": "通関",
@@ -357,12 +429,16 @@
   {
     "word": "仕える",
     "reading": "つかえる",
-    "meaning": "serve"
+    "meaning": "serve",
+    "example": "彼は長年、その医師に秘書として仕えた。",
+    "translation": "He served that doctor as a secretary for many years."
   },
   {
     "word": "付き添い",
     "reading": "つきそい",
-    "meaning": "companion; attendant; chaperone"
+    "meaning": "companion; attendant; chaperone",
+    "example": "病院へ行く母に付き添いとして同行した。",
+    "translation": "I accompanied my mother to the hospital."
   },
   {
     "word": "手柄",
@@ -374,12 +450,16 @@
   {
     "word": "出来心",
     "reading": "できごころ",
-    "meaning": "passing whim; momentary impulse"
+    "meaning": "passing whim; momentary impulse",
+    "example": "出来心でうそをついたことを、彼はすぐに後悔した。",
+    "translation": "He immediately regretted telling a lie on a passing impulse."
   },
   {
     "word": "なりふり",
     "reading": "なりふり",
-    "meaning": "appearance; how one looks or dresses"
+    "meaning": "appearance; how one looks or dresses",
+    "example": "彼は成功のためなら、なりふり構わず働いた。",
+    "translation": "He worked without caring about appearances in order to succeed."
   },
   {
     "word": "成り行き",
@@ -391,7 +471,9 @@
   {
     "word": "ノッポ",
     "reading": "のっぽ",
-    "meaning": "a tall, lanky person"
+    "meaning": "a tall, lanky person",
+    "example": "ノッポの彼は、教室の後ろからでも黒板がよく見える。",
+    "translation": "Because he is tall, he can see the blackboard well even from the back of the classroom."
   },
   {
     "word": "乗り心地",
@@ -410,17 +492,23 @@
   {
     "word": "張り込み",
     "reading": "はりこみ",
-    "meaning": "stakeout; surveillance"
+    "meaning": "stakeout; surveillance",
+    "example": "刑事は容疑者の家の前で夜通し張り込みをした。",
+    "translation": "The detective kept watch outside the suspect's house all night."
   },
   {
     "word": "筆者",
     "reading": "ひっしゃ",
-    "meaning": "writer"
+    "meaning": "writer",
+    "example": "筆者は環境問題の深刻さを訴えている。",
+    "translation": "The author emphasizes the seriousness of environmental problems."
   },
   {
     "word": "人並み",
     "reading": "ひとなみ",
-    "meaning": "average; ordinary; on par with others"
+    "meaning": "average; ordinary; on par with others",
+    "example": "彼女は人並みの幸せを望んでいる。",
+    "translation": "She wants ordinary happiness."
   },
   {
     "word": "侮辱的",
@@ -460,17 +548,23 @@
   {
     "word": "黙認",
     "reading": "もくにん",
-    "meaning": "tacit approval; turning a blind eye"
+    "meaning": "tacit approval; turning a blind eye",
+    "example": "店長はその違反を知りながら黙認していた。",
+    "translation": "The manager turned a blind eye to the violation despite knowing about it."
   },
   {
     "word": "持たれています",
     "reading": "もたれています",
-    "meaning": "is held; is regarded as (context-dependent; does not inherently mean “accused of”)"
+    "meaning": "is held; is regarded as (context-dependent; does not inherently mean “accused of”)",
+    "example": "この計画には、地域の人々から大きな期待が持たれています。",
+    "translation": "The local community has high expectations for this plan."
   },
   {
     "word": "やりくり",
     "reading": "やりくり",
-    "meaning": "making do; managing money, time, or resources"
+    "meaning": "making do; managing money, time, or resources",
+    "example": "限られた収入をやりくりして、家族を養っている。",
+    "translation": "She manages a limited income to support her family."
   },
   {
     "word": "有意義",
@@ -496,7 +590,9 @@
   {
     "word": "要因",
     "reading": "よういん",
-    "meaning": "factor; contributing cause"
+    "meaning": "factor; contributing cause",
+    "example": "睡眠不足は集中力が落ちる要因の一つだ。",
+    "translation": "Lack of sleep is one factor that reduces concentration."
   },
   {
     "word": "予防",
@@ -515,6 +611,8 @@
   {
     "word": "臨時休業",
     "reading": "りんじきゅうぎょう",
-    "meaning": "temporary closure"
+    "meaning": "temporary closure",
+    "example": "店は機械の故障のため、本日臨時休業します。",
+    "translation": "The shop is temporarily closed today because of a machine breakdown."
   }
 ]
